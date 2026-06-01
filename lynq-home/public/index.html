@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LYNQ — Que buscar trabajo no sea un trabajo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=DM+Sans:opsz,wght@9..40,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ---------- Tokens ---------- */
+  :root {
+    --bg: #efe9dc;
+    --bg-2: #e6dfcf;
+    --ink: #0e0e0c;
+    --ink-soft: #45433d;
+    --line: #c9c2b3;
+    --accent: #c6f432;
+    --accent-deep: #98c416;
+    --warm: #c63f1a;
+    --serif: "Fraunces", "Times New Roman", serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --pad: clamp(24px, 5vw, 80px);
+  }
+
+  /* ---------- Reset ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    font-size: 16px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: .35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* ---------- Utilities ---------- */
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .rule {
+    height: 1px;
+    background: var(--ink);
+    width: 100%;
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- Navigation ---------- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+    background: rgba(239, 233, 220, .82);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px var(--pad);
+  }
+  .brand {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .04em;
+  }
+  .nav-links a {
+    position: relative;
+    padding: 4px 0;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--warm); }
+  .nav-cta {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 16px;
+    border-radius: 999px;
+    transition: background .2s, transform .2s;
+  }
+  .nav-cta:hover { background: var(--warm); transform: translateY(-1px); }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: clamp(60px, 12vh, 140px) var(--pad) clamp(40px, 8vh, 90px);
+    position: relative;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 350;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+    font-size: clamp(56px, 14vw, 220px);
+    line-height: .88;
+    letter-spacing: -.045em;
+    margin-bottom: 32px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--warm);
+  }
+  .hero-sub {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: end;
+    padding-top: 40px;
+    border-top: 1px solid var(--ink);
+  }
+  .hero-tag {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 2.4vw, 32px);
+    line-height: 1.2;
+    letter-spacing: -.01em;
+    max-width: 520px;
+  }
+  .hero-tag b {
+    background: var(--accent);
+    padding: 0 4px;
+    font-weight: 400;
+    font-style: normal;
+    box-decoration-break: clone;
+  }
+  .hero-blurb {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  @media (max-width: 760px) {
+    .hero-sub { grid-template-columns: 1fr; gap: 24px; }
+    .hero-blurb { margin-left: 0; }
+  }
+
+  /* Decorative ticker */
+  .ticker {
+    overflow: hidden;
+    border-block: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 14px 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .ticker-track {
+    display: flex;
+    gap: 48px;
+    width: max-content;
+    animation: scroll 38s linear infinite;
+  }
+  .ticker-track span { display: inline-flex; align-items: center; gap: 18px; }
+  .ticker-track span::after {
+    content: "✦";
+    color: var(--accent);
+  }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ---------- Section frame ---------- */
+  section.frame {
+    padding: clamp(80px, 14vh, 160px) var(--pad);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .section-head {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 40px;
+    margin-bottom: 64px;
+    align-items: baseline;
+  }
+  .section-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-variation-settings: "opsz" 96;
+    font-size: clamp(40px, 6vw, 84px);
+    line-height: .95;
+    letter-spacing: -.03em;
+    max-width: 14ch;
+  }
+  .section-head h2 em {
+    font-style: italic;
+    color: var(--warm);
+  }
+  @media (max-width: 760px) {
+    .section-head { grid-template-columns: 1fr; gap: 14px; margin-bottom: 40px; }
+  }
+
+  /* ---------- Problem section ---------- */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .problem-card {
+    background: var(--bg);
+    padding: 40px;
+    min-height: 320px;
+    position: relative;
+  }
+  .problem-card h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    letter-spacing: -.02em;
+  }
+  .problem-card .role {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    color: var(--warm);
+  }
+  .problem-card p {
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .problem-card .icon {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 56px;
+    color: var(--accent-deep);
+    line-height: 1;
+  }
+  @media (max-width: 720px) {
+    .problem-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Persona toggle ---------- */
+  .toggle-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 56px;
+  }
+  .toggle {
+    display: inline-flex;
+    background: var(--ink);
+    border-radius: 999px;
+    padding: 4px;
+    position: relative;
+  }
+  .toggle button {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 12px 26px;
+    border-radius: 999px;
+    color: var(--bg-2);
+    transition: color .3s;
+    position: relative;
+    z-index: 2;
+  }
+  .toggle button.active { color: var(--ink); }
+  .toggle-thumb {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    background: var(--accent);
+    border-radius: 999px;
+    transition: transform .4s cubic-bezier(.6,0,.2,1), width .4s cubic-bezier(.6,0,.2,1);
+    z-index: 1;
+  }
+
+  /* Persona card */
+  .persona {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  .persona-card {
+    border: 1px solid var(--ink);
+    background: var(--bg-2);
+    padding: 36px;
+    position: relative;
+  }
+  .persona-card::before {
+    content: "";
+    position: absolute;
+    inset: -8px -8px auto auto;
+    width: 56px;
+    height: 56px;
+    background: var(--accent);
+    border: 1px solid var(--ink);
+    transform: rotate(8deg);
+  }
+  .persona-name {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -.025em;
+    margin-bottom: 6px;
+  }
+  .persona-name em {
+    font-style: italic;
+    color: var(--warm);
+  }
+  .persona-role {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  .persona-attrs {
+    display: grid;
+    gap: 14px;
+  }
+  .persona-attr {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line);
+    font-size: 14px;
+  }
+  .persona-attr:last-child { border: 0; }
+  .persona-attr dt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding-top: 2px;
+  }
+  .persona-attr dd { line-height: 1.45; }
+
+  .vp-block { margin-bottom: 28px; }
+  .vp-block h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .vp-block h4 .sigil {
+    display: inline-block;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 22px;
+    font-family: var(--serif);
+    font-size: 13px;
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .vp-block h4.jtbd .sigil { background: var(--ink); }
+  .vp-block h4.pain .sigil { background: var(--warm); }
+  .vp-block h4.gain .sigil { background: var(--accent); color: var(--ink); }
+  .vp-list {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+  }
+  .vp-list li {
+    font-size: 14.5px;
+    line-height: 1.45;
+    padding-left: 18px;
+    position: relative;
+    color: var(--ink);
+  }
+  .vp-list li::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    top: -1px;
+    font-family: var(--serif);
+    color: var(--warm);
+  }
+
+  @media (max-width: 880px) {
+    .persona { grid-template-columns: 1fr; gap: 36px; }
+  }
+
+  /* ---------- Features ---------- */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .feature {
+    background: var(--bg);
+    padding: 36px 32px;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: background .3s;
+  }
+  .feature:hover { background: var(--bg-2); }
+  .feature .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+  .feature h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+  }
+  .feature h3 .accent {
+    background: var(--accent);
+    padding: 0 4px;
+  }
+  .feature p {
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin-top: auto;
+  }
+  @media (max-width: 880px) {
+    .features-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 540px) {
+    .features-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Stats ---------- */
+  .stats-section {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .stats-section .label,
+  .stats-section .section-head h2,
+  .stats-section p { color: var(--bg); }
+  .stats-section .section-head h2 em { color: var(--accent); }
+  .stats-section { border-bottom-color: var(--ink); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+  .stat {
+    border-top: 1px solid rgba(239,233,220,.3);
+    padding-top: 24px;
+  }
+  .stat .big {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-variation-settings: "opsz" 144;
+    font-size: clamp(56px, 8vw, 120px);
+    line-height: .9;
+    letter-spacing: -.04em;
+    margin-bottom: 18px;
+    color: var(--accent);
+  }
+  .stat .big sup {
+    font-size: .35em;
+    font-family: var(--mono);
+    font-weight: 400;
+    color: var(--bg);
+    vertical-align: top;
+    margin-left: 4px;
+  }
+  .stat p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(239,233,220,.78);
+  }
+  @media (max-width: 880px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+  @media (max-width: 540px) {
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Closing / footer ---------- */
+  .closing {
+    padding: clamp(90px, 16vh, 180px) var(--pad);
+    text-align: center;
+  }
+  .closing h2 {
+    font-family: var(--serif);
+    font-weight: 350;
+    font-variation-settings: "opsz" 144;
+    font-size: clamp(48px, 9vw, 130px);
+    line-height: .9;
+    letter-spacing: -.04em;
+    max-width: 14ch;
+    margin: 0 auto 36px;
+  }
+  .closing h2 em {
+    font-style: italic;
+    color: var(--warm);
+  }
+  .closing .cta-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 12px;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 18px 28px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    transition: transform .2s, background .2s;
+  }
+  .btn-primary:hover { background: var(--warm); transform: translateY(-2px); }
+  .btn-ghost {
+    color: var(--ink);
+    padding: 18px 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  footer {
+    padding: 40px var(--pad);
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  footer a:hover { color: var(--warm); }
+  footer .col-end { text-align: right; }
+  footer .col-mid { text-align: center; }
+  @media (max-width: 640px) {
+    footer { grid-template-columns: 1fr; }
+    footer .col-end, footer .col-mid { text-align: left; }
+  }
+
+  footer.contact-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-top: 1px solid var(--line);
+  }
+  footer.contact-footer a {
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    footer.contact-footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <span class="brand-dot"></span>
+      LYNQ
+    </a>
+    <div class="nav-links">
+      <a href="#problema">§ 01 / Problema</a>
+      <a href="#persona">§ 02 / Persona</a>
+      <a href="#producto">§ 03 / Producto</a>
+      <a href="#datos">§ 04 / Datos</a>
+    </div>
+    <a href="#cierre" class="nav-cta">Empezar</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-meta">
+    <span class="label">Módulo 03 · El Cliente</span>
+    <span class="label">MBA · Universidad de San Andrés · 2025</span>
+  </div>
+
+  <h1>
+    Que buscar<br>
+    trabajo <em>no sea</em><br>
+    un trabajo.
+  </h1>
+
+  <div class="hero-sub">
+    <p class="hero-tag">
+      <b>LYNQ</b> es un marketplace de dos vías que conecta candidatos y empresas con <em>matching predictivo</em>, transparencia salarial y un Score de compatibilidad real.
+    </p>
+    <p class="hero-blurb">
+      Tatiana Ibañez · Melanie Huetagoyena Rija. Una tesis sobre por qué el mercado laboral está roto en ambos lados — y qué se puede hacer al respecto.
+    </p>
+  </div>
+</header>
+
+<!-- ============ TICKER ============ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>Matching predictivo</span>
+    <span>Transparencia salarial</span>
+    <span>CV Tailor automático</span>
+    <span>LYNQ Score</span>
+    <span>One-Click Apply</span>
+    <span>Time-to-fill predictivo</span>
+    <span>Dashboard salarial</span>
+    <span>Shortlist inteligente</span>
+    <!-- Duplicate for seamless loop -->
+    <span>Matching predictivo</span>
+    <span>Transparencia salarial</span>
+    <span>CV Tailor automático</span>
+    <span>LYNQ Score</span>
+    <span>One-Click Apply</span>
+    <span>Time-to-fill predictivo</span>
+    <span>Dashboard salarial</span>
+    <span>Shortlist inteligente</span>
+  </div>
+</div>
+
+<!-- ============ PROBLEMA ============ -->
+<section class="frame" id="problema">
+  <div class="section-head reveal">
+    <span class="label">§ 01 — El Problema</span>
+    <h2>Una paradoja <em>estructural</em> en ambos lados del mercado.</h2>
+  </div>
+
+  <div class="problem-grid reveal">
+    <article class="problem-card">
+      <div class="role">Desde el candidato</div>
+      <h3>Decenas de portales. Cero claridad.</h3>
+      <p>Perfiles que se completan una y otra vez, CVs que se adaptan a mano para cada rubro, y opacidad total sobre el salario real, los postulantes que compiten y las chances de avanzar. Frustración, tiempo perdido y desgaste emocional.</p>
+      <div class="icon">↗</div>
+    </article>
+    <article class="problem-card">
+      <div class="role">Desde la empresa</div>
+      <h3>Herramientas reactivas. Datos escasos.</h3>
+      <p>Información salarial desactualizada, sin forma de anticipar el time-to-fill, screening manual que consume semanas y un costo de oportunidad alto. El desajuste entre oferta y demanda coexiste con la falta de transparencia.</p>
+      <div class="icon">↙</div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ PERSONA ============ -->
+<section class="frame" id="persona">
+  <div class="section-head reveal">
+    <span class="label">§ 02 — Segmentos target</span>
+    <h2>Dos lados. Una <em>misma</em> plataforma.</h2>
+  </div>
+
+  <div class="toggle-wrap reveal">
+    <div class="toggle" role="tablist">
+      <div class="toggle-thumb" id="toggleThumb"></div>
+      <button class="active" data-tab="b2c" role="tab">B2C — Valentina</button>
+      <button data-tab="b2b" role="tab">B2B — TechScale</button>
+    </div>
+  </div>
+
+  <!-- ====== B2C persona ====== -->
+  <div class="persona" id="panel-b2c" data-panel="b2c">
+    <aside class="persona-card reveal">
+      <div class="persona-name">Valentina <em>M.</em></div>
+      <div class="persona-role">Profesional en transición · 29 años</div>
+      <dl class="persona-attrs">
+        <div class="persona-attr"><dt>Educación</dt><dd>Lic. en Administración (UBA). Cursos de Excel y analítica.</dd></div>
+        <div class="persona-attr"><dt>Situación</dt><dd>Operaciones en empresa mediana. Busca activamente un puesto con mejor sueldo y crecimiento.</dd></div>
+        <div class="persona-attr"><dt>Psicografía</dt><dd>Orientada a resultados, digital, valora transparencia y eficiencia.</dd></div>
+        <div class="persona-attr"><dt>Comportamiento</dt><dd>Revisa LinkedIn y Bumeran a diario. Adapta el CV manualmente para cada postulación.</dd></div>
+        <div class="persona-attr"><dt>Movilizador</dt><dd>Urgencia económica + frustración acumulada. Quiere ahorrar tiempo y ganar claridad.</dd></div>
+      </dl>
+    </aside>
+
+    <div class="vp-canvas reveal">
+      <div class="vp-block">
+        <h4 class="jtbd"><span class="sigil">J</span>Jobs to be done</h4>
+        <ul class="vp-list">
+          <li>Encontrar un empleo compatible con su experiencia y expectativas salariales.</li>
+          <li>Saber si su CV es competitivo y cómo mejorar su posicionamiento.</li>
+          <li>Adaptar su CV según la industria sin ser experta en cada rubro.</li>
+          <li>Conocer el rango salarial real antes de la instancia de negociación.</li>
+        </ul>
+      </div>
+      <div class="vp-block">
+        <h4 class="pain"><span class="sigil">P</span>Pains</h4>
+        <ul class="vp-list">
+          <li>Cargar la misma información en portales que no se hablan entre sí.</li>
+          <li>Sin visibilidad sobre cuántos candidatos compiten ni qué tan competitivo es su perfil.</li>
+          <li>Llega a entrevistas sin saber si la oferta será aceptable.</li>
+        </ul>
+      </div>
+      <div class="vp-block">
+        <h4 class="gain"><span class="sigil">G</span>Gains</h4>
+        <ul class="vp-list">
+          <li>Un único lugar para centralizar y gestionar todas sus postulaciones.</li>
+          <li>Un LYNQ Score que indica compatibilidad real con cada puesto.</li>
+          <li>CV tailoring automático adaptado al lenguaje de cada industria.</li>
+          <li>Transparencia salarial integrada en la búsqueda.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== B2B persona ====== -->
+  <div class="persona" id="panel-b2b" data-panel="b2b" style="display:none;">
+    <aside class="persona-card reveal">
+      <div class="persona-name">TechScale <em>S.A.</em></div>
+      <div class="persona-role">Scale-up · Fintech · LATAM</div>
+      <dl class="persona-attrs">
+        <div class="persona-attr"><dt>Industria</dt><dd>Tecnología / Fintech. Operaciones en Argentina, México y Colombia.</dd></div>
+        <div class="persona-attr"><dt>Tamaño</dt><dd>150–400 empleados. 3–8 contrataciones por mes. Equipo de RRHH de 4.</dd></div>
+        <div class="persona-attr"><dt>Decisor</dt><dd>CHRO o Head of Talent Acquisition. Reporta a CEO.</dd></div>
+        <div class="persona-attr"><dt>Comportamiento</dt><dd>Demos + trials de 30 días. Prioriza integración con ATS (Greenhouse, Lever).</dd></div>
+        <div class="persona-attr"><dt>Movilizador</dt><dd>Reducir el time-to-fill de 6 semanas a menos de 3. Crecer sin bajar calidad.</dd></div>
+      </dl>
+    </aside>
+
+    <div class="vp-canvas reveal">
+      <div class="vp-block">
+        <h4 class="jtbd"><span class="sigil">J</span>Jobs to be done</h4>
+        <ul class="vp-list">
+          <li>Cubrir posiciones con candidatos de alta calidad en el menor tiempo posible.</li>
+          <li>Tomar decisiones salariales competitivas para atraer y retener talento.</li>
+          <li>Anticipar la dificultad para cubrir una posición antes de iniciar el proceso.</li>
+          <li>Entender qué skills son más demandadas para orientar las búsquedas.</li>
+        </ul>
+      </div>
+      <div class="vp-block">
+        <h4 class="pain"><span class="sigil">P</span>Pains</h4>
+        <ul class="vp-list">
+          <li>El sourcing manual consume 40–60% del tiempo del equipo de RRHH.</li>
+          <li>Sin acceso a datos salariales actualizados; dependen de consultoras costosas.</li>
+          <li>Lanzan búsquedas sin saber si el perfil es escaso o abundante.</li>
+        </ul>
+      </div>
+      <div class="vp-block">
+        <h4 class="gain"><span class="sigil">G</span>Gains</h4>
+        <ul class="vp-list">
+          <li>Shortlist inteligente que reduce el tiempo de screening 60–70%.</li>
+          <li>Dashboard de salarios por rol, seniority y ubicación en tiempo real.</li>
+          <li>Predicción de time-to-fill y mapas de disponibilidad por skill.</li>
+          <li>Score de compatibilidad objetivo que mejora la retención temprana.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRODUCTO ============ -->
+<section class="frame" id="producto">
+  <div class="section-head reveal">
+    <span class="label">§ 03 — Producto</span>
+    <h2>Seis funcionalidades. <em>Un</em> mercado más sano.</h2>
+  </div>
+
+  <div class="features-grid reveal">
+    <article class="feature">
+      <div class="num">01 / Onboarding</div>
+      <h3>Perfil inicial + <span class="accent">LYNQ Score</span></h3>
+      <p>Un puntaje objetivo de compatibilidad que reemplaza la intuición. Para vos: claridad sobre tus chances. Para la empresa: shortlist en horas.</p>
+    </article>
+    <article class="feature">
+      <div class="num">02 / Búsqueda</div>
+      <h3>Metabuscador con <span class="accent">matching predictivo</span></h3>
+      <p>Centraliza decenas de portales en una sola interfaz e identifica roles compatibles incluso fuera de tu industria actual.</p>
+    </article>
+    <article class="feature">
+      <div class="num">03 / Aplicación</div>
+      <h3>One-Click Apply + <span class="accent">CV Tailor</span></h3>
+      <p>Adaptación automática del CV al lenguaje y las expectativas de cada industria. Lo que antes te tomaba horas, ahora un click.</p>
+    </article>
+    <article class="feature">
+      <div class="num">04 / Seguimiento</div>
+      <h3>Agente IA <span class="accent">de seguimiento</span></h3>
+      <p>Monitoreo del estado real de tus postulaciones. Se acabó la espera en el vacío sin saber si tu CV fue siquiera abierto.</p>
+    </article>
+    <article class="feature">
+      <div class="num">05 / Salario</div>
+      <h3>Dashboard salarial <span class="accent">en tiempo real</span></h3>
+      <p>Datos por rol, seniority y ubicación. Para vos: negociar desde una posición informada. Para la empresa: definir bandas competitivas.</p>
+    </article>
+    <article class="feature">
+      <div class="num">06 / Predicción</div>
+      <h3>Time-to-fill <span class="accent">predictivo</span></h3>
+      <p>Antes de lanzar una búsqueda, sabés si el perfil es escaso o abundante. Decisiones de hiring con datos, no con corazonadas.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ============ DATOS / STATS ============ -->
+<section class="frame stats-section" id="datos">
+  <div class="section-head reveal">
+    <span class="label">§ 04 — Validación</span>
+    <h2>Insights de las <em>entrevistas</em> en profundidad.</h2>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat reveal">
+      <div class="big" data-count="100">0<sup>%</sup></div>
+      <p>de los candidatos entrevistados usa más de 3 portales en simultáneo, sin integración entre ellos.</p>
+    </div>
+    <div class="stat reveal">
+      <div class="big" data-count="80">0<sup>%</sup></div>
+      <p>de los líderes de Talent Acquisition no cuenta con datos salariales de mercado actualizados propios.</p>
+    </div>
+    <div class="stat reveal">
+      <div class="big" data-count="50">0<sup>%</sup></div>
+      <p>del tiempo de los equipos de RRHH se consume en screening manual de CVs de baja relevancia.</p>
+    </div>
+    <div class="stat reveal">
+      <div class="big" data-count="6">0<sup>meses</sup></div>
+      <p>es la duración promedio de una búsqueda laboral activa reportada por los entrevistados B2C.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CIERRE ============ -->
+<section class="closing" id="cierre">
+  <span class="label reveal">Hipótesis validada</span>
+  <h2 class="reveal">Que <em>buscar</em> trabajo no sea un trabajo.</h2>
+  <div class="cta-row reveal">
+    <a href="#top" class="btn-primary">Volver al inicio ↑</a>
+    <a href="#producto" class="btn-ghost">Ver el producto →</a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="col-start">© LYNQ · 2025</div>
+  <div>
+    <div class="col-mid">Tatiana Ibañez · Melanie Huetagoyena Rija</div>
+    <div class="col-end">MBA — UdeSA · Módulo 3</div>
+  </div>
+  <div>
+    <div class="col-mid">Flores Jorge Federico</div>
+    <div class="col-end">Maestría en Inteligencia Artificial — UdeSA</div>
+  </div>
+
+</footer>
+
+<!-- ============ CONTACT FOOTER ============ -->
+<footer class="contact-footer">
+  <div>Contact the team</div>
+  <a href="mailto:contact@lynqoficial.com">contact@lynqoficial.com</a>
+</footer>
+
+<script>
+  /* ---------- Reveal on scroll ---------- */
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  reveals.forEach((el) => io.observe(el));
+
+  /* ---------- Persona toggle ---------- */
+  const toggleBtns = document.querySelectorAll('.toggle button');
+  const thumb = document.getElementById('toggleThumb');
+  const panelB2C = document.getElementById('panel-b2c');
+  const panelB2B = document.getElementById('panel-b2b');
+
+  function positionThumb(btn) {
+    const rect = btn.getBoundingClientRect();
+    const parentRect = btn.parentElement.getBoundingClientRect();
+    thumb.style.width = rect.width + 'px';
+    thumb.style.transform = `translateX(${rect.left - parentRect.left - 4}px)`;
+  }
+  // Set initial position
+  window.addEventListener('load', () => {
+    const active = document.querySelector('.toggle button.active');
+    if (active) positionThumb(active);
+  });
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.toggle button.active');
+    if (active) positionThumb(active);
+  });
+
+  toggleBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      toggleBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      positionThumb(btn);
+
+      const tab = btn.dataset.tab;
+      if (tab === 'b2c') {
+        panelB2C.style.display = 'grid';
+        panelB2B.style.display = 'none';
+      } else {
+        panelB2C.style.display = 'none';
+        panelB2B.style.display = 'grid';
+        // Trigger reveal for newly shown elements
+        panelB2B.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
+      }
+    });
+  });
+
+  /* ---------- Stat counter ---------- */
+  const statEls = document.querySelectorAll('.stat .big');
+  const statIO = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.count, 10);
+        const supHTML = el.querySelector('sup') ? el.querySelector('sup').outerHTML : '';
+        let current = 0;
+        const duration = 1400;
+        const startTime = performance.now();
+
+        function tick(now) {
+          const t = Math.min(1, (now - startTime) / duration);
+          // ease-out cubic
+          const eased = 1 - Math.pow(1 - t, 3);
+          current = Math.round(eased * target);
+          el.innerHTML = current + supHTML;
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        statIO.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  statEls.forEach((el) => statIO.observe(el));
+
+  /* ---------- Smooth nav offset for sticky header ---------- */
+  // Native scroll-behavior handles smoothness; nothing extra needed.
+</script>
+
+</body>
+</html>

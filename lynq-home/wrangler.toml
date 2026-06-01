@@ -1,0 +1,6 @@
+name = "lynq-oficial"
+compatibility_date = "2026-05-22"
+preview_urls=false
+
+[assets]
+directory = "./public"
