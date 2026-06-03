@@ -1,0 +1,97 @@
+package com.lynq.iam.controller;
+
+import com.lynq.iam.controller.request.CreateUserRequest;
+import com.lynq.iam.controller.request.EmailUserLogin;
+import com.lynq.iam.controller.request.UserUpdatePasswordRequest;
+import com.lynq.iam.controller.request.UsernameLogin;
+import com.lynq.iam.controller.response.AccessTokenRefreshedResponse;
+import com.lynq.iam.controller.response.ErrorRestResponse;
+import com.lynq.iam.controller.response.GlobalRestResponse;
+import com.lynq.iam.controller.response.UserRestResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Tag(name = "Users", description = "User management operations")
+@Validated
+@RequestMapping("/auth")
+public interface AuthController {
+
+  @Operation(summary = "Create a new user", description = "Registers a new user with unique username and email")
+  @ApiResponses({
+    @ApiResponse(responseCode = "201", description = "User created successfully",
+      content = @Content(schema = @Schema(implementation = UserRestResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid request fields",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "409", description = "Username or email already exists",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class)))
+  })
+  GlobalRestResponse<UserRestResponse> createUser(@Valid @RequestBody CreateUserRequest request);
+
+
+  @Operation(summary = "Update password", description = "Updates the user's password and returns new access and refresh tokens")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Password updated successfully",
+      content = @Content(schema = @Schema(implementation = UserRestResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid request fields",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "401", description = "Missing or invalid access token",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "403", description = "User not found",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class)))
+  })
+  GlobalRestResponse<UserRestResponse> updatePassword(@RequestHeader("Authorization") @NotBlank String accessToken, @Valid @RequestBody UserUpdatePasswordRequest userUpdatePasswordRequest);
+
+  @Operation(summary = "Login by username", description = "Authenticates a user by username and password, returns access and refresh tokens")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Login successful",
+      content = @Content(schema = @Schema(implementation = UserRestResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid request fields",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "403", description = "Invalid username or password",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class)))
+  })
+  GlobalRestResponse<UserRestResponse> loginByUsername(@Valid @RequestBody UsernameLogin usernameLoginRequest);
+
+  @Operation(summary = "Login by email", description = "Authenticates a user by email and password, returns access and refresh tokens")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Login successful",
+      content = @Content(schema = @Schema(implementation = UserRestResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid request fields",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "403", description = "Invalid email or password",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class)))
+  })
+  GlobalRestResponse<UserRestResponse> loginByEmail(@Valid @RequestBody EmailUserLogin emailUserLoginRequest);
+
+  @Operation(summary = "Validate access token", description = "Checks if the provided access token is valid and not expired")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Token validation result",
+      content = @Content(schema = @Schema(example = "{\"success\": true, \"data\": true}"))),
+    @ApiResponse(responseCode = "401", description = "Missing Authorization header",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class)))
+  })
+  GlobalRestResponse<Boolean> isAccessTokenValid(@RequestHeader("Authorization") @NotBlank String accessToken);
+
+  @Operation(summary = "Refresh access token", description = "Generates a new access token using a valid refresh token")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "New access token generated",
+      content = @Content(schema = @Schema(implementation = AccessTokenRefreshedResponse.class))),
+    @ApiResponse(responseCode = "401", description = "Missing Authorization header",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "403", description = "User not found",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class))),
+    @ApiResponse(responseCode = "403", description = "Invalid or expired refresh token",
+      content = @Content(schema = @Schema(implementation = ErrorRestResponse.class)))
+  })
+  GlobalRestResponse<AccessTokenRefreshedResponse> generateNewAccessToken(@RequestHeader("Authorization") @NotBlank String refreshToken);
+}
