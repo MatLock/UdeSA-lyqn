@@ -7,11 +7,14 @@ services:
     environment:
       - DB_URL=jdbc:mysql://mysql:3306/lynq_iam_db
       - DB_USERNAME=${DB_USERNAME:-root}
-      - DB_PASSWORD=${DB_PASSWORD:-federico}
+      - DB_PASSWORD=${DB_PASSWORD:-testpassword123}
       - REDIS_ADDRESS=redis
       - REDIS_PORT=6379
       - REDIS_USERNAME=${REDIS_USERNAME:-}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ACCESS_TOKEN_EXPIRATION_MINUTES=${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:-15}
+      - JWT_REFRESH_TOKEN_EXPIRATION_DAYS=${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:-30}
     depends_on:
       mysql:
         condition: service_healthy
@@ -23,7 +26,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-federico}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-testpassword123}
       - MYSQL_DATABASE=lynq_iam_db
     volumes:
       - mysql_data:/var/lib/mysql
@@ -37,10 +40,22 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    command:
+      - "redis-server"
+      - "--user"
+      - "default"
+      - "off"
+      - "--user"
+      - "${REDIS_USERNAME:-root}"
+      - "on"
+      - ">${REDIS_PASSWORD:-password}"
+      - "~*"
+      - "&*"
+      - "+@all"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--user", "${REDIS_USERNAME:-root}", "-a", "${REDIS_PASSWORD:-password}", "--no-auth-warning", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
