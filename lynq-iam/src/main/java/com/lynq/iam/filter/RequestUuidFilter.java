@@ -59,6 +59,7 @@ public class RequestUuidFilter extends OncePerRequestFilter {
             objectMapper.writeValue(response.getWriter(), errorResponse);
             return;
         }
+        response.setHeader(REQUEST_UUID_HEADER, requestUuid);
         MDC.put(MDC_REQUEST_ID, requestUuid);
         try {
             filterChain.doFilter(request, response);
