@@ -1,0 +1,3 @@
+date,prompt
+13-06-2026,scan controller package and build a postman collection, save the file under `postman/lyqn-iam.postman_collection.json`
+13-06-2026,update README.md with new endpoint information `/userinfo`. add this prompt into `prompt-documentation/prompt.csv` file
