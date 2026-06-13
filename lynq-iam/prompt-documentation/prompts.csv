@@ -9,3 +9,14 @@ date,prompt
 "13-06-2026","add junit test case for UserEntity in package model"
 "13-06-2026","add junit test case for RefreshTokenGenerator in package security"
 "13-06-2026","add junit tests for classes in service package, follow project pattern for proper testing"
+"13-06-2026"," getting no bean of type TestRestTemplateFound in class IamApplicationTests"
+"13-06-2026","what is the cause of this error, happens when calling `updatePasswordEndpointReturnsOkAndReissuesTokensWhenAccessTokenIsValid` stacktrace:  ```org.springframework.http.converter.HttpMessageConversionException: Type definition error: [simple type, class com.fasterxml.jackson.databind.JsonNode]
+
+    at org.springframework.http.converter.AbstractJacksonHttpMessageConverter.readJavaType(AbstractJacksonHttpMessageConverter.java:360)
+    at org.springframework.http.converter.AbstractJacksonHttpMessageConverter.read(AbstractJacksonHttpMessageConverter.java:319)
+    at org.springframework.web.client.HttpMessageConverterExtractor.extractData(HttpMessageConverterExtractor.java:112)
+    at org.springframework.web.client.RestTemplate$ResponseEntityResponseExtractor.extractData(RestTemplate.java:1035)
+    at org.springframework.web.client.RestTemplate$ResponseEntityResponseExtractor.extractData(RestTemplate.java:1019)
+    at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:757)
+    at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:677)
+    at org.springframework.web.client.RestTemplate.exchange(RestTemplate.java:561)```"

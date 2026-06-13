@@ -1,6 +1,7 @@
 package com.lynq.iam.controller.handler;
 
 import com.lynq.iam.controller.response.ErrorRestResponse;
+import com.lynq.iam.exceptions.ForbiddenException;
 import com.lynq.iam.exceptions.InvalidPasswordException;
 import com.lynq.iam.exceptions.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +36,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(InvalidPasswordException.class)
   public ResponseEntity<ErrorRestResponse<Void>> handleInvalidPassword(InvalidPasswordException ex) {
     log.error("message= Invalid password", ex);
+    return ResponseEntity
+        .status(HttpStatus.FORBIDDEN)
+        .body(new ErrorRestResponse<>(null, ex.getMessage()));
+  }
+
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<ErrorRestResponse<Void>> handleForbidden(ForbiddenException ex) {
+    log.error("message= Forbidden", ex);
     return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
         .body(new ErrorRestResponse<>(null, ex.getMessage()));

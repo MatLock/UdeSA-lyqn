@@ -14,6 +14,7 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 @Log4j2
@@ -41,6 +42,7 @@ public class JWTService {
   public String generateAccessToken(UserEntity user) {
     Instant now = Instant.now();
     return Jwts.builder()
+      .id(UUID.randomUUID().toString())
       .subject(user.getId())
       .claim(USERNAME_CLAIM, user.getUsername())
       .claim(EMAIL_CLAIM, user.getEmail())
