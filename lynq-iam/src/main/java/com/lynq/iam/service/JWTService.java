@@ -67,14 +67,6 @@ public class JWTService {
     return parseClaims(token).get(EMAIL_CLAIM, String.class);
   }
 
-  private Claims parseClaims(String token) {
-    return Jwts.parser()
-        .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
-        .build()
-        .parseSignedClaims(token)
-        .getPayload();
-  }
-
   @AuditLog
   public boolean isAccessTokenValid(String token) {
     try {
@@ -87,6 +79,14 @@ public class JWTService {
       log.error("message= Access token validation failed, token={}", token, e);
       return false;
     }
+  }
+
+  private Claims parseClaims(String token) {
+    return Jwts.parser()
+        .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
   }
 
 }

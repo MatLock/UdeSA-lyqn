@@ -39,6 +39,7 @@ public class UserService {
   }
 
   @Transactional
+  @AuditLog
   public void updatePassword(String userId, String password) {
     UserEntity user = userRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("User not found"));

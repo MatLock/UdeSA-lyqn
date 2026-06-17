@@ -1,5 +1,6 @@
 package com.lynq.iam.controller.impl;
 
+import com.lynq.iam.aspect.AuditLog;
 import com.lynq.iam.controller.AuthController;
 import com.lynq.iam.controller.request.CreateUserRequest;
 import com.lynq.iam.controller.request.EmailUserLogin;
@@ -29,6 +30,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @PostMapping("/register")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<UserRestResponse>> createUser(@RequestBody CreateUserRequest request) {
     GlobalRestResponse<UserRestResponse> body = new GlobalRestResponse<>(true, authService.registerUser(
         request.getUsername(),
@@ -42,6 +44,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @PostMapping("/login/username")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<UserRestResponse>> loginByUsername(@RequestBody UsernameLogin usernameLoginRequest) {
     GlobalRestResponse<UserRestResponse> body = new GlobalRestResponse<>(true, authService.loginByUsername(
         usernameLoginRequest.getUsername(),
@@ -54,6 +57,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @PostMapping("/login/email")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<UserRestResponse>> loginByEmail(@RequestBody EmailUserLogin emailUserLoginRequest) {
     GlobalRestResponse<UserRestResponse> body = new GlobalRestResponse<>(true, authService.loginByEmail(
         emailUserLoginRequest.getEmail(),
@@ -66,6 +70,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @PatchMapping("/update-password")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<UserRestResponse>> updatePassword(
       @RequestHeader("Authorization") String accessToken,
       @RequestBody UserUpdatePasswordRequest userUpdatePasswordRequest) {
@@ -79,6 +84,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @GetMapping("/validate")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<Boolean>> isAccessTokenValid(
       @RequestHeader("Authorization") String accessToken) {
     String token = accessToken.startsWith(BEARER_PREFIX) ? accessToken.substring(7) : accessToken;
@@ -90,6 +96,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @PostMapping("/refresh")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<AccessTokenRefreshedResponse>> generateNewAccessToken(
       @RequestHeader("Authorization") String refreshToken) {
     String token = refreshToken.startsWith(BEARER_PREFIX) ? refreshToken.substring(7) : refreshToken;
@@ -102,6 +109,7 @@ public class AuthControllerImpl implements AuthController {
 
   @Override
   @GetMapping("/userinfo")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<UserInfoRestResponse>> obtainUserInfoFromToken(
       @RequestHeader("Authorization") String accessToken) {
     String token = accessToken.startsWith(BEARER_PREFIX) ? accessToken.substring(7) : accessToken;
