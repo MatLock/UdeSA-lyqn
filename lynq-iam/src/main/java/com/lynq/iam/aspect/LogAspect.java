@@ -36,10 +36,10 @@ public class LogAspect {
     String[] parameterNames = codeSignature.getParameterNames();
     Object[] arguments = joinPoint.getArgs();
     List<String> logValues = createParameterList(parameterNames, arguments);
-    log.debug("message= Started Method '{}' with parameters '{}'", joinPoint.getSignature().getName(), logValues);
+    log.info("message= Started Method '{}' with parameters '{}'", joinPoint.getSignature().getName(), logValues);
     try{
       Object returnValue = joinPoint.proceed();
-      log.debug("message= Finished Method '{}' with parameters '{}'", joinPoint.getSignature().getName(), logValues);
+      log.info("message= Finished Method '{}' with parameters '{}'", joinPoint.getSignature().getName(), logValues);
       return returnValue;
     }catch(Exception e){
       log.error("message= Error when executing Method '{}' with parameter '{}'",  joinPoint.getSignature().getName(), logValues, e);
