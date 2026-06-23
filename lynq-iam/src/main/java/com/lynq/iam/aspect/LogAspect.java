@@ -25,6 +25,8 @@ public class LogAspect {
   private static final String PARAMETER_FORMAT = "%s:%s";
   private static final String PASSWORD_PARAM = "password";
   private static final String NEW_PASSWORD_PARAM = "newPassword";
+  private static final String REFRESH_TOKEN_PARAM = "refreshToken";
+  private static final String ACCESS_TOKEN_PARAM = "accessToken";
   private static final String MASK = "********";
 
   private final ObjectMapper objectMapper;
@@ -106,7 +108,10 @@ public class LogAspect {
   }
 
   private boolean isSensitiveField(String fieldName) {
-    return PASSWORD_PARAM.equalsIgnoreCase(fieldName) || NEW_PASSWORD_PARAM.equalsIgnoreCase(fieldName);
+    return PASSWORD_PARAM.equalsIgnoreCase(fieldName)
+        || NEW_PASSWORD_PARAM.equalsIgnoreCase(fieldName)
+        || REFRESH_TOKEN_PARAM.equalsIgnoreCase(fieldName)
+        || ACCESS_TOKEN_PARAM.equalsIgnoreCase(fieldName);
   }
 
 
