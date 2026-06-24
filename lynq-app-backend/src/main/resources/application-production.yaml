@@ -29,6 +29,8 @@ spring:
     change-log: classpath:changelog/db.changelog-config.xml
 
 lynq:
+  iam:
+    url: ${LYNQ_IAM_URL:http://lynq-iam:8080/lynq-iam}
 
 
 server:

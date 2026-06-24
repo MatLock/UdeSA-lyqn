@@ -1,7 +1,9 @@
 package com.lynq.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lynq.backend.client.LynqIamClient;
 import com.lynq.backend.filter.AuthHeaderExistenceFilter;
+import com.lynq.backend.filter.IamAuthenticationFilter;
 import com.lynq.backend.filter.RequestUuidFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +27,13 @@ class FilterConfigTest {
 
   private static final int REQUEST_UUID_FILTER_ORDER = 0;
   private static final int AUTH_HEADER_EXISTENCE_FILTER_ORDER = 1;
+  private static final int IAM_AUTHENTICATION_FILTER_ORDER = 2;
 
   @Mock
   private ObjectMapper objectMapper;
+
+  @Mock
+  private LynqIamClient lynqIamClient;
 
   private FilterConfig filterConfig;
 
@@ -83,5 +89,30 @@ class FilterConfigTest {
         filterConfig.createAuthHeaderExistenceFilter(objectMapper);
 
     assertThat(registration.getOrder(), is(AUTH_HEADER_EXISTENCE_FILTER_ORDER));
+  }
+
+  @Test
+  void createIamAuthenticationFilterReturnsRegistrationBeanWithIamAuthenticationFilter() {
+    FilterRegistrationBean<IamAuthenticationFilter> registration =
+        filterConfig.createIamAuthenticationFilter(lynqIamClient, objectMapper);
+
+    assertThat(registration, is(notNullValue()));
+    assertThat(registration.getFilter(), is(instanceOf(IamAuthenticationFilter.class)));
+  }
+
+  @Test
+  void createIamAuthenticationFilterAppliesToAllUrlPatterns() {
+    FilterRegistrationBean<IamAuthenticationFilter> registration =
+        filterConfig.createIamAuthenticationFilter(lynqIamClient, objectMapper);
+
+    assertThat(registration.getUrlPatterns(), contains(URL_PATTERN_ALL));
+  }
+
+  @Test
+  void createIamAuthenticationFilterHasExpectedOrder() {
+    FilterRegistrationBean<IamAuthenticationFilter> registration =
+        filterConfig.createIamAuthenticationFilter(lynqIamClient, objectMapper);
+
+    assertThat(registration.getOrder(), is(IAM_AUTHENTICATION_FILTER_ORDER));
   }
 }

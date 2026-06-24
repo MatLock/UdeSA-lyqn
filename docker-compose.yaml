@@ -32,11 +32,14 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/lynq_backend_db
       - DB_USERNAME=${DB_USERNAME:-root}
       - DB_PASSWORD=${DB_PASSWORD:-testpassword123}
+      - LYNQ_IAM_URL=http://lynq-iam:8080/lynq-iam
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
+      lynq-iam:
+        condition: service_started
 
   mysql:
     image: mysql:9.0
