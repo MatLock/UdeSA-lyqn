@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: 21
-          distribution: adopt
+          distribution: temurin
           architecture: x64
           cache: maven
 
@@ -69,7 +69,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: 21
-          distribution: adopt
+          distribution: temurin
           architecture: x64
           cache: maven
 

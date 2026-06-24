@@ -14,6 +14,10 @@ This repository is the umbrella for all modules that make up the platform. Each 
 
 The identity and access management module for Lynq. It handles user accounts and sign-in, keeps sessions secure, and acts as the gatekeeper that lets the rest of the platform know who is making each request.
 
+### lynq-app-backend &nbsp; [![CI](https://github.com/MatLock/UdeSA-lyqn/actions/workflows/lyqn-test-workflow.yaml/badge.svg)](https://github.com/MatLock/UdeSA-lyqn/actions/workflows/lyqn-test-workflow.yaml) [![Coverage](https://raw.githubusercontent.com/MatLock/UdeSA-lyqn/main/.github/badges/jacoco-app-backend.svg)](https://github.com/MatLock/UdeSA-lyqn/actions/workflows/lyqn-test-workflow.yaml)
+
+The core application backend for Lynq. It exposes the platform's REST API, enforcing authenticated and audited access on top of the identity provided by lynq-iam, and backs the candidate-facing experience — listings, applications, and tracking — with persistent storage and caching.
+
 ### feeders
 
 Tooling to seed Lynq with realistic job-listing data for development. Bundles three feeders that normalize to a shared listing schema: a LinkedIn dataset loader (bulk seed data from Hugging Face) and polite live scrapers for Computrabajo Argentina and Bumeran Argentina.
