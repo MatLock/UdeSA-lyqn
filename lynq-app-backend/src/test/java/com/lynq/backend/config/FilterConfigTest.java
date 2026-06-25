@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.notNullValue;
 class FilterConfigTest {
 
   private static final String URL_PATTERN_ALL = "/*";
-  private static final String URL_PATTERN_VALIDATE = "/lynq-app-backend";
 
   private static final int REQUEST_UUID_FILTER_ORDER = 0;
   private static final int AUTH_HEADER_EXISTENCE_FILTER_ORDER = 1;
@@ -79,7 +78,7 @@ class FilterConfigTest {
         filterConfig.createAuthHeaderExistenceFilter(objectMapper);
 
     assertThat(registration.getUrlPatterns(), containsInAnyOrder(
-        URL_PATTERN_VALIDATE
+        URL_PATTERN_ALL
     ));
   }
 

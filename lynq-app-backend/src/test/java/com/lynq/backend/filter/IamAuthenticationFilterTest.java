@@ -19,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -45,16 +44,13 @@ class IamAuthenticationFilterTest {
   private static final String REQUEST_UUID_HEADER = "lynq-request-uuid";
   private static final String VALID_AUTH_HEADER_VALUE = "Bearer eyJhbGciOiJIUzI1NiJ9.access.token";
   private static final String REQUEST_UUID_VALUE = "550e8400-e29b-41d4-a716-446655440000";
-  private static final String BLANK_HEADER_VALUE = "   ";
 
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String USERNAME = "johndoe";
   private static final String EMAIL = "johndoe@example.com";
 
-  private static final String EXPECTED_MISSING_AUTH_REASON = "Missing Authorization header";
   private static final String EXPECTED_INVALID_TOKEN_REASON = "Invalid or expired access token";
   private static final String EXPECTED_IAM_UNAVAILABLE_REASON = "Authentication service is unavailable";
-  private static final String EXPECTED_CONTENT_TYPE = MediaType.APPLICATION_JSON_VALUE;
   private static final int UNAUTHORIZED = HttpStatus.UNAUTHORIZED.value();
   private static final int SERVICE_UNAVAILABLE = HttpStatus.SERVICE_UNAVAILABLE.value();
 
@@ -86,32 +82,6 @@ class IamAuthenticationFilterTest {
   @AfterEach
   void tearDown() {
     SecurityContextHolder.clearContext();
-  }
-
-  @Test
-  void writesUnauthorizedWhenAuthorizationHeaderIsMissing() throws Exception {
-    when(request.getHeader(AUTHORIZATION_HEADER)).thenReturn(null);
-    when(response.getWriter()).thenReturn(responseWriter);
-    ArgumentCaptor<ErrorRestResponse<Void>> errorCaptor = errorRestResponseCaptor();
-
-    filter.doFilterInternal(request, response, filterChain);
-
-    verify(response).setStatus(UNAUTHORIZED);
-    verify(response).setContentType(EXPECTED_CONTENT_TYPE);
-    verify(filterChain, never()).doFilter(any(), any());
-    verify(objectMapper).writeValue(eq(responseWriter), errorCaptor.capture());
-    assertThat(errorCaptor.getValue().getReason(), is(EXPECTED_MISSING_AUTH_REASON));
-  }
-
-  @Test
-  void writesUnauthorizedWhenAuthorizationHeaderIsBlank() throws Exception {
-    when(request.getHeader(AUTHORIZATION_HEADER)).thenReturn(BLANK_HEADER_VALUE);
-    when(response.getWriter()).thenReturn(responseWriter);
-
-    filter.doFilterInternal(request, response, filterChain);
-
-    verify(response).setStatus(UNAUTHORIZED);
-    verify(filterChain, never()).doFilter(any(), any());
   }
 
   @Test

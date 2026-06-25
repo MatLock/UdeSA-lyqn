@@ -25,7 +25,7 @@ public class FilterConfig {
     public FilterRegistrationBean<AuthHeaderExistenceFilter> createAuthHeaderExistenceFilter(ObjectMapper objectMapper) {
         FilterRegistrationBean<AuthHeaderExistenceFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new AuthHeaderExistenceFilter(objectMapper));
-        registration.addUrlPatterns("/lynq-app-backend");
+        registration.addUrlPatterns("/*");
         registration.setOrder(1);
         return registration;
     }

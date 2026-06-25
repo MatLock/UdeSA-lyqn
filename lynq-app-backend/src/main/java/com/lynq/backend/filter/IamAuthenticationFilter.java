@@ -24,11 +24,12 @@ import java.util.Collections;
 /**
  * Authenticates incoming requests against the lynq-iam identity provider:
  * <ol>
- *   <li>validates that the {@code Authorization} header exists;</li>
  *   <li>calls lynq-iam to validate the access token;</li>
  *   <li>calls lynq-iam to obtain the user info from the token;</li>
  *   <li>loads the resolved user into the Spring Security context.</li>
  * </ol>
+ * The presence of the {@code Authorization} header is guaranteed upstream by
+ * {@link AuthHeaderExistenceFilter}, which runs earlier in the chain.
  * The {@code lynq-request-uuid} header is forwarded on every lynq-iam call so
  * the request can be tracked across services in the logs.
  */
@@ -37,16 +38,8 @@ public class IamAuthenticationFilter extends OncePerRequestFilter {
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String REQUEST_UUID_HEADER = "lynq-request-uuid";
 
-  private static final String MISSING_AUTHORIZATION_HEADER_ERROR = "Missing Authorization header";
   private static final String INVALID_TOKEN_ERROR = "Invalid or expired access token";
   private static final String IAM_UNAVAILABLE_ERROR = "Authentication service is unavailable";
-
-  private static final String[] WHITELISTED_PATH_PREFIXES = {
-      "/swagger-ui",
-      "/v3/api-docs",
-      "/swagger-resources",
-      "/webjars"
-  };
 
   private final LynqIamClient lynqIamClient;
   private final ObjectMapper objectMapper;
@@ -58,46 +51,32 @@ public class IamAuthenticationFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    String path = request.getServletPath();
-    if ("/swagger-ui.html".equals(path)) {
-      return true;
-    }
-    for (String prefix : WHITELISTED_PATH_PREFIXES) {
-      if (path.startsWith(prefix)) {
-        return true;
-      }
-    }
-    return false;
+    return PublicPaths.isPublic(request);
   }
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                   FilterChain filterChain) throws ServletException, IOException {
-    // 1 - validate that the Authorization header exists
-    String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-    if (authHeader == null || authHeader.isBlank()) {
-      writeError(response, HttpStatus.UNAUTHORIZED, MISSING_AUTHORIZATION_HEADER_ERROR);
-      return;
-    }
 
+    String authHeader = request.getHeader(AUTHORIZATION_HEADER);
     String requestUuid = request.getHeader(REQUEST_UUID_HEADER);
 
     try {
-      // 2 - call lynq-iam to validate the token
+      // 1 - call lynq-iam to validate the token
       GlobalRestResponse<Boolean> validation = lynqIamClient.validateToken(authHeader, requestUuid);
       if (validation == null || !Boolean.TRUE.equals(validation.getData())) {
         writeError(response, HttpStatus.UNAUTHORIZED, INVALID_TOKEN_ERROR);
         return;
       }
 
-      // 3 - call lynq-iam to obtain the user info from the token
+      // 2 - call lynq-iam to obtain the user info from the token
       GlobalRestResponse<UserInfoResponse> userInfo = lynqIamClient.getUserInfo(authHeader, requestUuid);
       if (userInfo == null || userInfo.getData() == null) {
         writeError(response, HttpStatus.UNAUTHORIZED, INVALID_TOKEN_ERROR);
         return;
       }
 
-      // 4 - load the user info into the security context
+      // 3 - load the user info into the security context
       loadSecurityContext(userInfo.getData(), request);
     } catch (FeignException.Unauthorized | FeignException.Forbidden e) {
       writeError(response, HttpStatus.UNAUTHORIZED, INVALID_TOKEN_ERROR);

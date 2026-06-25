@@ -107,6 +107,20 @@ class AuthHeaderExistenceFilterTest {
     assertThat(captured.getData(), is(nullValue()));
   }
 
+  @Test
+  void shouldNotFilterPublicPathsSoTheyAreNotBlockedWhenAuthorizationHeaderIsMissing() {
+    when(request.getServletPath()).thenReturn("/swagger-ui/index.html");
+
+    assertThat(filter.shouldNotFilter(request), is(true));
+  }
+
+  @Test
+  void shouldFilterNonPublicPaths() {
+    when(request.getServletPath()).thenReturn("/api/v1/resource");
+
+    assertThat(filter.shouldNotFilter(request), is(false));
+  }
+
   @SuppressWarnings("unchecked")
   private static ArgumentCaptor<ErrorRestResponse<Void>> errorRestResponseCaptor() {
     return ArgumentCaptor.forClass(ErrorRestResponse.class);
