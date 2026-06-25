@@ -1,6 +1,7 @@
 package com.lynq.backend.controller.handler;
 
 import com.lynq.backend.controller.response.ErrorRestResponse;
+import com.lynq.backend.exceptions.BadRequestException;
 import com.lynq.backend.exceptions.ForbiddenException;
 import com.lynq.backend.exceptions.InvalidPasswordException;
 import com.lynq.backend.exceptions.UserNotFoundException;
@@ -46,6 +47,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     log.error("message= Forbidden", ex);
     return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
+        .body(new ErrorRestResponse<>(null, ex.getMessage()));
+  }
+
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ErrorRestResponse<Void>> handleBadRequest(BadRequestException ex) {
+    log.error("message= Bad request", ex);
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
         .body(new ErrorRestResponse<>(null, ex.getMessage()));
   }
 

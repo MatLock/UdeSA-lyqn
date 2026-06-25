@@ -1,8 +1,11 @@
 package com.lynq.backend;
 
 import com.lynq.backend.controller.request.CreateUserRequest;
+import com.lynq.backend.controller.request.CreateUserWithCompanyRequest;
 import com.lynq.backend.enums.UserType;
+import com.lynq.backend.model.CompanyEntity;
 import com.lynq.backend.model.UserEntity;
+import com.lynq.backend.repository.CompanyRepository;
 import com.lynq.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
 
   private static final String CONTEXT_PATH = "/lynq-app-backend";
   private static final String CREATE_USER_PATH = "/user";
+  private static final String CREATE_COMPANY_PATH = "/company";
   private static final String VALIDATE_PATH = "/auth/validate";
   private static final String USERINFO_PATH = "/auth/userinfo";
 
@@ -50,6 +54,11 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   private static final String LINKEDIN_URL = "https://linkedin.com/in/janedoe";
   private static final LocalDate BIRTH_DATE = LocalDate.of(1995, 4, 12);
 
+  private static final String COMPANY_NAME = "Lynq Technologies";
+  private static final String COMPANY_ABOUT = "We build talent matching platforms.";
+  private static final Integer COMPANY_SIZE = 250;
+  private static final String COMPANY_PROFILE_IMAGE_URL = "https://cdn.lynq.com/logos/lynq.png";
+
   @LocalServerPort
   private int port;
 
@@ -59,11 +68,15 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private CompanyRepository companyRepository;
+
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
   @BeforeEach
   void setUp() {
     lynqIamMock.reset();
+    companyRepository.deleteAll();
     userRepository.deleteAll();
   }
 
@@ -103,6 +116,69 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     assertThat(userRepository.findById(USER_ID).isPresent(), is(false));
   }
 
+  @Test
+  void createUserWithCompanyAuthenticatesPersistsOwnerAndCompanyAndReturnsCreated() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+
+    HttpResponse<String> response = postCreateUserWithCompany();
+
+    assertThat(response.statusCode(), is(201));
+    Map<String, Object> body = parse(response.body());
+    assertThat(body.get("success"), is(true));
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> data = (Map<String, Object>) body.get("data");
+    String companyId = (String) data.get("companyId");
+    assertThat(companyId, is(notNullValue()));
+    assertThat(data.get("companyName"), is(COMPANY_NAME));
+    assertThat(data.get("companyAbout"), is(COMPANY_ABOUT));
+    assertThat(data.get("companySize"), is(COMPANY_SIZE));
+    assertThat(data.get("companyProfileImageUrl"), is(COMPANY_PROFILE_IMAGE_URL));
+    assertThat(data.get("companyCreatedOn"), is(notNullValue()));
+    assertThat(data.get("ownerUserId"), is(USER_ID));
+
+    Optional<CompanyEntity> persistedCompany = companyRepository.findById(companyId);
+    assertThat(persistedCompany.isPresent(), is(true));
+    assertThat(persistedCompany.get().getName(), is(COMPANY_NAME));
+    assertThat(persistedCompany.get().getSize(), is(COMPANY_SIZE));
+
+    Optional<UserEntity> persistedOwner = userRepository.findById(USER_ID);
+    assertThat(persistedOwner.isPresent(), is(true));
+    assertThat(persistedOwner.get().getType(), is(UserType.COMPANY));
+    assertThat(persistedOwner.get().getCurrentPosition(), is(CURRENT_POSITION));
+  }
+
+  @Test
+  void createUserWithCompanyReturnsBadRequestWhenCompanyNameAlreadyExists() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    companyRepository.save(CompanyEntity.builder()
+        .id("22222222-2222-2222-2222-222222222222")
+        .name(COMPANY_NAME)
+        .createdOn(LocalDate.now())
+        .build());
+
+    HttpResponse<String> response = postCreateUserWithCompany();
+
+    assertThat(response.statusCode(), is(400));
+    assertThat(parse(response.body()).get("success"), is(false));
+    // the owner must not be persisted when the company name is rejected
+    assertThat(userRepository.findById(USER_ID).isPresent(), is(false));
+    assertThat(companyRepository.count(), is(1L));
+  }
+
+  @Test
+  void createUserWithCompanyReturnsUnauthorizedWhenIamRejectsToken() throws Exception {
+    stubIamInvalidToken();
+
+    HttpResponse<String> response = postCreateUserWithCompany();
+
+    assertThat(response.statusCode(), is(401));
+    assertThat(userRepository.findById(USER_ID).isPresent(), is(false));
+    assertThat(companyRepository.count(), is(0L));
+  }
+
   private HttpResponse<String> postCreateUser() throws Exception {
     HttpRequest httpRequest = HttpRequest.newBuilder()
         .uri(URI.create(createUserUrl()))
@@ -110,6 +186,17 @@ class BackendAppApplicationTests extends AbstractE2ETest {
         .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
         .header(REQUEST_UUID_HEADER, REQUEST_UUID)
         .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(validRequest())))
+        .build();
+    return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+  }
+
+  private HttpResponse<String> postCreateUserWithCompany() throws Exception {
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+        .uri(URI.create(createCompanyUrl()))
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+        .header(REQUEST_UUID_HEADER, REQUEST_UUID)
+        .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(validCompanyRequest())))
         .build();
     return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
   }
@@ -157,6 +244,10 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     return "http://localhost:" + port + CONTEXT_PATH + CREATE_USER_PATH;
   }
 
+  private String createCompanyUrl() {
+    return "http://localhost:" + port + CONTEXT_PATH + CREATE_COMPANY_PATH;
+  }
+
   private CreateUserRequest validRequest() {
     CreateUserRequest request = new CreateUserRequest();
     request.setUserType(UserType.CANDIDATE);
@@ -166,6 +257,20 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     request.setGithubUrl(GITHUB_URL);
     request.setLinkedinUrl(LINKEDIN_URL);
     request.setBirthDate(BIRTH_DATE);
+    return request;
+  }
+
+  private CreateUserWithCompanyRequest validCompanyRequest() {
+    CreateUserWithCompanyRequest request = new CreateUserWithCompanyRequest();
+    request.setUserProfileImageUrl(PROFILE_IMAGE_URL);
+    request.setCurrentPosition(CURRENT_POSITION);
+    request.setUserAbout(ABOUT);
+    request.setLinkedinUrl(LINKEDIN_URL);
+    request.setBirthDate(BIRTH_DATE);
+    request.setCompanyName(COMPANY_NAME);
+    request.setCompanyAbout(COMPANY_ABOUT);
+    request.setCompanySize(COMPANY_SIZE);
+    request.setCompanyProfileImageUrl(COMPANY_PROFILE_IMAGE_URL);
     return request;
   }
 }

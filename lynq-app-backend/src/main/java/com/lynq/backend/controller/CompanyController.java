@@ -1,7 +1,7 @@
 package com.lynq.backend.controller;
 
-import com.lynq.backend.controller.request.CreateUserRequest;
-import com.lynq.backend.controller.response.CreateUserRestResponse;
+import com.lynq.backend.controller.request.CreateUserWithCompanyRequest;
+import com.lynq.backend.controller.response.CreateUserWithCompanyRestResponse;
 import com.lynq.backend.controller.response.GlobalRestResponse;
 import com.lynq.backend.security.LynqUserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,35 +18,34 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
-@Tag(name = "User", description = "Operations for managing Lynq platform users")
-public interface UserController {
+@Tag(name = "Company", description = "Operations for managing Lynq platform companies")
+public interface CompanyController {
 
   @Operation(
-      summary = "Create a new user",
-      description = "Creates the profile of the authenticated user. The user identity is resolved "
-          + "from the bearer token, so only the profile fields are supplied in the request body.",
+      summary = "Create a company together with its owner profile",
+      description = "Creates the profile of the authenticated user as a COMPANY-type user and the "
+          + "company they own in a single call. The owner identity is resolved from the bearer "
+          + "token, while the company id is generated server-side.",
       security = @SecurityRequirement(name = "bearerAuth"))
   @ApiResponses({
       @ApiResponse(
           responseCode = "201",
-          description = "User created successfully",
+          description = "User and company created successfully",
           content = @Content(
-              schema = @Schema(implementation = CreateUserRestResponse.class),
+              schema = @Schema(implementation = CreateUserWithCompanyRestResponse.class),
               examples = @ExampleObject(
                   name = "Created",
                   value = """
                       {
                         "success": true,
                         "data": {
-                          "id": "550e8400-e29b-41d4-a716-446655440000",
-                          "userType": "CANDIDATE",
-                          "userProfileImageUrl": "https://cdn.lynq.com/avatars/jane.png",
-                          "currentPosition": "Backend Engineer",
-                          "about": "Java developer focused on distributed systems.",
-                          "githubUrl": "https://github.com/janedoe",
-                          "linkedinUrl": "https://linkedin.com/in/janedoe",
-                          "birthDate": "1995-04-12",
-                          "createdOn": "2026-06-25"
+                          "companyId": "018f9c3a-2b1d-7c4e-9a6f-1e2d3c4b5a60",
+                          "companyName": "Lynq",
+                          "companyAbout": "Hiring platform for engineers.",
+                          "companySize": 42,
+                          "companyProfileImageUrl": "https://cdn.lynq.com/logos/lynq.png",
+                          "companyCreatedOn": "2026-06-25",
+                          "ownerUserId": "550e8400-e29b-41d4-a716-446655440000"
                         }
                       }"""))),
       @ApiResponse(
@@ -59,7 +58,7 @@ public interface UserController {
                       {
                         "success": false,
                         "data": {
-                          "currentPosition": "must not be blank",
+                          "companyName": "must not be blank",
                           "birthDate": "must not be null"
                         },
                         "reason": "Invalid Fields Found"
@@ -110,23 +109,25 @@ public interface UserController {
               + "for log correlation. Requests without it are rejected with 403.",
           example = "550e8400-e29b-41d4-a716-446655440000")
   })
-  ResponseEntity<GlobalRestResponse<CreateUserRestResponse>> createUser(
+  ResponseEntity<GlobalRestResponse<CreateUserWithCompanyRestResponse>> createUserWithCompany(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "Profile details for the new user",
+          description = "Owner profile details and company details",
           required = true,
           content = @Content(examples = @ExampleObject(
-              name = "Candidate profile",
+              name = "Company owner",
               value = """
                   {
-                    "userType": "CANDIDATE",
                     "userProfileImageUrl": "https://cdn.lynq.com/avatars/jane.png",
-                    "currentPosition": "Backend Engineer",
-                    "about": "Java developer focused on distributed systems.",
-                    "githubUrl": "https://github.com/janedoe",
+                    "currentPosition": "Founder",
+                    "userAbout": "Building the Lynq hiring platform.",
                     "linkedinUrl": "https://linkedin.com/in/janedoe",
-                    "birthDate": "1995-04-12"
+                    "birthDate": "1995-04-12",
+                    "companyName": "Lynq",
+                    "companyAbout": "Hiring platform for engineers.",
+                    "companySize": 42,
+                    "companyProfileImageUrl": "https://cdn.lynq.com/logos/lynq.png"
                   }""")))
-      @Valid CreateUserRequest request,
+      @Valid CreateUserWithCompanyRequest request,
       @Parameter(hidden = true) LynqUserPrincipal principal);
 
 }

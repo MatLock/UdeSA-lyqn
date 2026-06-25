@@ -26,8 +26,6 @@ import static org.mockito.Mockito.when;
 class UserControllerImplTest {
 
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
-  private static final String USERNAME = "janedoe";
-  private static final String EMAIL = "jane@lynq.com";
   private static final UserType USER_TYPE = UserType.CANDIDATE;
   private static final String PROFILE_IMAGE_URL = "https://cdn.lynq.com/avatars/jane.png";
   private static final String CURRENT_POSITION = "Backend Engineer";
@@ -40,23 +38,25 @@ class UserControllerImplTest {
   @Mock
   private UserService userService;
 
-  private UserControllerImpl userController;
-
+  @Mock
   private CreateUserRequest request;
+
+  @Mock
   private LynqUserPrincipal principal;
+
+  private UserControllerImpl userController;
 
   @BeforeEach
   void setUp() {
     userController = new UserControllerImpl(userService);
-    principal = new LynqUserPrincipal(USER_ID, USERNAME, EMAIL);
-    request = new CreateUserRequest();
-    request.setUserType(USER_TYPE);
-    request.setUserProfileImageUrl(PROFILE_IMAGE_URL);
-    request.setCurrentPosition(CURRENT_POSITION);
-    request.setAbout(ABOUT);
-    request.setGithubUrl(GITHUB_URL);
-    request.setLinkedinUrl(LINKEDIN_URL);
-    request.setBirthDate(BIRTH_DATE);
+    when(principal.getId()).thenReturn(USER_ID);
+    when(request.getUserType()).thenReturn(USER_TYPE);
+    when(request.getUserProfileImageUrl()).thenReturn(PROFILE_IMAGE_URL);
+    when(request.getCurrentPosition()).thenReturn(CURRENT_POSITION);
+    when(request.getAbout()).thenReturn(ABOUT);
+    when(request.getGithubUrl()).thenReturn(GITHUB_URL);
+    when(request.getLinkedinUrl()).thenReturn(LINKEDIN_URL);
+    when(request.getBirthDate()).thenReturn(BIRTH_DATE);
   }
 
   @Test

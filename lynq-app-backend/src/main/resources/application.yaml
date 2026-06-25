@@ -39,6 +39,12 @@ server:
   servlet:
     context-path: '/lynq-backend-app'
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 management:
   server:
     port: 8086

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS lynq_backend_db.job_posts (
     salary_range_lower  INT,
     salary_range_top    INT,
     job_url             VARCHAR(2048),
-    job_post_type       ENUM('LYNQ', 'LINKEDIN', 'COMPUTRABAJO', 'BUMERAN') NOT NULL,
+    job_post_source       ENUM('LYNQ', 'LINKEDIN', 'COMPUTRABAJO', 'BUMERAN') NOT NULL,
     created_by_user_id  VARCHAR(36),
     company_id          VARCHAR(36),
     created_on          DATE         NOT NULL DEFAULT (CURRENT_DATE),

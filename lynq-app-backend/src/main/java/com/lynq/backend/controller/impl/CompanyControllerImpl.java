@@ -1,0 +1,49 @@
+package com.lynq.backend.controller.impl;
+
+import com.lynq.backend.controller.request.CreateUserWithCompanyRequest;
+import com.lynq.backend.controller.response.CreateUserWithCompanyRestResponse;
+import com.lynq.backend.controller.response.GlobalRestResponse;
+import com.lynq.backend.model.CompanyEntity;
+import com.lynq.backend.security.LynqUserPrincipal;
+import com.lynq.backend.service.CompanyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/company")
+@Validated
+public class CompanyControllerImpl implements com.lynq.backend.controller.CompanyController {
+
+  private final CompanyService companyService;
+
+  public CompanyControllerImpl(CompanyService companyService) {
+    this.companyService = companyService;
+  }
+
+  @Override
+  @PostMapping
+  public ResponseEntity<GlobalRestResponse<CreateUserWithCompanyRestResponse>> createUserWithCompany(@RequestBody CreateUserWithCompanyRequest request, @AuthenticationPrincipal LynqUserPrincipal principal) {
+    CompanyEntity company = companyService.createUserWithCompany(principal.getId(), request);
+
+    CreateUserWithCompanyRestResponse response = CreateUserWithCompanyRestResponse.builder()
+        .companyId(company.getId())
+        .companyName(company.getName())
+        .companyAbout(company.getAbout())
+        .companySize(company.getSize())
+        .companyProfileImageUrl(company.getProfileImageUrl())
+        .companyCreatedOn(company.getCreatedOn())
+        .ownerUserId(company.getOwner().getId())
+        .build();
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(new GlobalRestResponse<>(true, response));
+  }
+
+}
