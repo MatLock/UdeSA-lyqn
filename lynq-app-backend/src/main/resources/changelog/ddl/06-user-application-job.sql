@@ -3,7 +3,7 @@
 --changeset lynq:06-create-user-application-job-table
 CREATE TABLE IF NOT EXISTS lynq_backend_db.user_application_job (
     id                   VARCHAR(36) NOT NULL,
-    job_post_id               VARCHAR(36) NOT NULL,
+    job_post_id          VARCHAR(36) NOT NULL,
     user_id              VARCHAR(36) NOT NULL,
     applied_on           DATE        NOT NULL DEFAULT (CURRENT_DATE),
     application_seen_on  DATE,
