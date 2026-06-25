@@ -22,13 +22,14 @@ import static org.hamcrest.Matchers.is;
 class IamApplicationTests extends AbstractE2ETest {
 
 	private static final String CONTEXT_PATH = "/lynq-iam";
-	private static final String REGISTER_ENDPOINT = CONTEXT_PATH + "/register";
-	private static final String LOGIN_USERNAME_ENDPOINT = CONTEXT_PATH + "/login/username";
-	private static final String LOGIN_EMAIL_ENDPOINT = CONTEXT_PATH + "/login/email";
-	private static final String UPDATE_PASSWORD_ENDPOINT = CONTEXT_PATH + "/update-password";
-	private static final String VALIDATE_ENDPOINT = CONTEXT_PATH + "/validate";
-	private static final String REFRESH_ENDPOINT = CONTEXT_PATH + "/refresh";
-	private static final String USERINFO_ENDPOINT = CONTEXT_PATH + "/userinfo";
+	private static final String AUTH_PATH = CONTEXT_PATH + "/auth";
+	private static final String REGISTER_ENDPOINT = AUTH_PATH + "/register";
+	private static final String LOGIN_USERNAME_ENDPOINT = AUTH_PATH + "/login/username";
+	private static final String LOGIN_EMAIL_ENDPOINT = AUTH_PATH + "/login/email";
+	private static final String UPDATE_PASSWORD_ENDPOINT = AUTH_PATH + "/update-password";
+	private static final String VALIDATE_ENDPOINT = AUTH_PATH + "/validate";
+	private static final String REFRESH_ENDPOINT = AUTH_PATH + "/refresh";
+	private static final String USERINFO_ENDPOINT = AUTH_PATH + "/userinfo";
 
 	private static final String REQUEST_UUID_HEADER = "lynq-request-uuid";
 	private static final String AUTHORIZATION_HEADER = "Authorization";

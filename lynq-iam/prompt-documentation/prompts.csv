@@ -25,3 +25,4 @@ date,prompt
 "17-06-2026","getting error when executing `mvn -e clean install`. error `NoClassDefFound Could not initialize class com.lynq.iam.IamApplicationTests`. If you need to execute test run jdk21 command to set proper jdk"
 "23-06-2026","read LogAspect.java I need to mask refreshToken and accessToken as well"
 "23-06-2026","read LogAspect.java I need to mask refreshToken and accessToken as well"
+"25-06-2026","modify log Aspect to log the real class and not the classlog in log4j"
