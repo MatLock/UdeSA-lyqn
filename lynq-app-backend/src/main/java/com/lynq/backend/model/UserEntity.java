@@ -60,4 +60,8 @@ public class UserEntity {
   @Builder.Default
   private List<UserSkillsEntity> skills = new ArrayList<>();
 
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<UserResumeEntity> resumes = new ArrayList<>();
+
 }
