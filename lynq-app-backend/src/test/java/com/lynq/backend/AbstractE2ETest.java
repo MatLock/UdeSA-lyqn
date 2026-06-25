@@ -1,11 +1,12 @@
 package com.lynq.backend;
 
+import org.mockserver.client.MockServerClient;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
@@ -15,22 +16,26 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public abstract class AbstractE2ETest {
 
-  private static final int REDIS_PORT = 6379;
+  private static final DockerImageName MOCKSERVER_IMAGE =
+      DockerImageName.parse("mockserver/mockserver:5.15.0");
 
-  @SuppressWarnings("resource")
-  protected static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:7.2-alpine"))
-      .withExposedPorts(REDIS_PORT)
+  /**
+   * Stands in for the lynq-iam identity provider. Tests register expectations on
+   * its {@code /auth/validate} and {@code /auth/userinfo} endpoints through
+   * {@link #lynqIamMock}.
+   */
+  protected static final MockServerContainer LYNQ_IAM = new MockServerContainer(MOCKSERVER_IMAGE)
       .withReuse(true);
 
+  protected static MockServerClient lynqIamMock;
+
   static {
-    REDIS.start();
+    LYNQ_IAM.start();
+    lynqIamMock = new MockServerClient(LYNQ_IAM.getHost(), LYNQ_IAM.getServerPort());
   }
 
   @DynamicPropertySource
-  static void registerRedisProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.data.redis.host", REDIS::getHost);
-    registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(REDIS_PORT));
-    registry.add("spring.data.redis.username", () -> "");
-    registry.add("spring.data.redis.password", () -> "");
+  static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+    registry.add("lynq.iam.url", LYNQ_IAM::getEndpoint);
   }
 }

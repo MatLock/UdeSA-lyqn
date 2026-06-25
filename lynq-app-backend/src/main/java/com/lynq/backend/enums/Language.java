@@ -1,4 +1,4 @@
-package com.lynq.backend.model;
+package com.lynq.backend.enums;
 
 public enum Language {
   EN,

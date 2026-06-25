@@ -1,5 +1,7 @@
 package com.lynq.backend.model;
 
+import com.lynq.backend.enums.JobPostType;
+import com.lynq.backend.enums.WorkType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -43,3 +43,23 @@ add search index by name"
 "25-06-2026","create spring repository classes in repository folder, do not add any particular method. I'll add them later as the logic unfolds"
 "25-06-2026","create entity userResumeEntity, associate this entity with userEntity and add JunitTest for this new entity class"
 "25-06-2026","create UserResumeRepository"
+"25-06-2026","create method UserService.saveNewUser(..) that it takes the following primitives
+ - userId [String]
+ - type [UserType]
+ - profileImageUrl [String]
+ - currentPosition [String]
+ - about [String]
+ - githubUrl [String]
+ - linkedInUrl [String]
+ - birthDate [date]
+ 
+creates a new userEntity and save it into database"
+"25-06-2026","create controller method createUser that it takes a user request. validations should be done with jakarta validation and exceptions must be caught in ExceptionHandler"
+"25-06-2026","add return type CreateUserRestResponse as part of the response"
+"25-06-2026","add swagger specification and examples in interface UserController"
+"25-06-2026","add JunitTest for classes UserController and UserService"
+"25-06-2026","add integration test in LynqAppBackendApplication. use MockServer to mock auth endpoints from lynq-iam"
+"25-06-2026","remove all redis occurrences. This project won't use redis so remove the tests,classes and maven dependencies"
+"25-06-2026","execute tests"
+"25-06-2026","check this log by the aspect `2026-06-25T14:59:54,176 INFO  [qtp86338905-73] c.l.b.a.LogAspect [550e8400-e29b-41d4-a716-446655440000]:` I want the real class name to appear in the logs. not the aspect class"
+"25-06-2026","yes"

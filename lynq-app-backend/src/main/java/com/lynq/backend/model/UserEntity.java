@@ -1,5 +1,6 @@
 package com.lynq.backend.model;
 
+import com.lynq.backend.enums.UserType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,5 +1,6 @@
 package com.lynq.backend.model;
 
+import com.lynq.backend.enums.UserType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

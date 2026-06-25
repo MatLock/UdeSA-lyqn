@@ -1,0 +1,61 @@
+package com.lynq.backend.controller.impl;
+
+import com.lynq.backend.controller.UserController;
+import com.lynq.backend.controller.request.CreateUserRequest;
+import com.lynq.backend.controller.response.CreateUserRestResponse;
+import com.lynq.backend.controller.response.GlobalRestResponse;
+import com.lynq.backend.model.UserEntity;
+import com.lynq.backend.security.LynqUserPrincipal;
+import com.lynq.backend.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/user")
+@Validated
+public class UserControllerImpl implements UserController {
+
+
+  private final UserService userService;
+
+  public UserControllerImpl(UserService userService){
+    this.userService = userService;
+  }
+
+  @Override
+  @PostMapping
+  public ResponseEntity<GlobalRestResponse<CreateUserRestResponse>> createUser(@RequestBody CreateUserRequest request, @AuthenticationPrincipal LynqUserPrincipal principal) {
+    UserEntity user = userService.saveNewUser(
+        principal.getId(),
+        request.getUserType(),
+        request.getUserProfileImageUrl(),
+        request.getCurrentPosition(),
+        request.getAbout(),
+        request.getGithubUrl(),
+        request.getLinkedinUrl(),
+        request.getBirthDate());
+
+    CreateUserRestResponse response = CreateUserRestResponse.builder()
+        .id(user.getId())
+        .userType(user.getType())
+        .userProfileImageUrl(user.getProfileImageUrl())
+        .currentPosition(user.getCurrentPosition())
+        .about(user.getAbout())
+        .githubUrl(user.getGithubUrl())
+        .linkedinUrl(user.getLinkedinUrl())
+        .birthDate(user.getBirthDate())
+        .createdOn(user.getCreatedOn())
+        .build();
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(new GlobalRestResponse<>(true, response));
+  }
+
+}

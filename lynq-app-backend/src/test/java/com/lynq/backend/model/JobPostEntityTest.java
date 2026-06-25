@@ -1,5 +1,7 @@
 package com.lynq.backend.model;
 
+import com.lynq.backend.enums.JobPostType;
+import com.lynq.backend.enums.WorkType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

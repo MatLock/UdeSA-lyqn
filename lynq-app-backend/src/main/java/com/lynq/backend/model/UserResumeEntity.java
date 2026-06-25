@@ -1,5 +1,6 @@
 package com.lynq.backend.model;
 
+import com.lynq.backend.enums.Language;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,6 +42,9 @@ public class UserResumeEntity {
 
   @Column(name = "created_on", nullable = false)
   private LocalDate createdOn;
+
+  @Column(name = "name", length = 255)
+  private String name;
 
   @Column(name = "storage_path", length = 255)
   private String storagePath;
