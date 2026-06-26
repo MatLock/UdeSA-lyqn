@@ -42,7 +42,7 @@ class JobPostEntityTest {
         .title(TITLE)
         .description(DESCRIPTION)
         .workType(WORK_TYPE)
-        .salaryRangeLower(SALARY_RANGE_LOWER)
+        .salaryRangeDown(SALARY_RANGE_LOWER)
         .salaryRangeTop(SALARY_RANGE_TOP)
         .jobUrl(JOB_URL)
         .jobPostType(JOB_POST_TYPE)
@@ -58,7 +58,7 @@ class JobPostEntityTest {
     assertThat(jobPostEntity.getTitle(), is(TITLE));
     assertThat(jobPostEntity.getDescription(), is(DESCRIPTION));
     assertThat(jobPostEntity.getWorkType(), is(WORK_TYPE));
-    assertThat(jobPostEntity.getSalaryRangeLower(), is(SALARY_RANGE_LOWER));
+    assertThat(jobPostEntity.getSalaryRangeDown(), is(SALARY_RANGE_LOWER));
     assertThat(jobPostEntity.getSalaryRangeTop(), is(SALARY_RANGE_TOP));
     assertThat(jobPostEntity.getJobUrl(), is(JOB_URL));
     assertThat(jobPostEntity.getJobPostType(), is(JOB_POST_TYPE));

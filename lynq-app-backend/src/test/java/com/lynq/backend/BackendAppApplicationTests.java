@@ -1,11 +1,17 @@
 package com.lynq.backend;
 
+import com.lynq.backend.controller.request.CreateJobRequest;
 import com.lynq.backend.controller.request.CreateUserRequest;
 import com.lynq.backend.controller.request.CreateUserWithCompanyRequest;
+import com.lynq.backend.enums.JobPostType;
 import com.lynq.backend.enums.UserType;
+import com.lynq.backend.enums.WorkType;
 import com.lynq.backend.model.CompanyEntity;
+import com.lynq.backend.model.JobPostEntity;
 import com.lynq.backend.model.UserEntity;
 import com.lynq.backend.repository.CompanyRepository;
+import com.lynq.backend.repository.JobPostRepository;
+import com.lynq.backend.repository.JobPostSkillRepository;
 import com.lynq.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +25,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockserver.model.HttpRequest.request;
@@ -33,6 +41,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   private static final String CONTEXT_PATH = "/lynq-app-backend";
   private static final String CREATE_USER_PATH = "/user";
   private static final String CREATE_COMPANY_PATH = "/company";
+  private static final String CREATE_JOB_PATH = "/job";
   private static final String VALIDATE_PATH = "/auth/validate";
   private static final String USERINFO_PATH = "/auth/userinfo";
 
@@ -58,6 +67,15 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   private static final String COMPANY_ABOUT = "We build talent matching platforms.";
   private static final Integer COMPANY_SIZE = 250;
   private static final String COMPANY_PROFILE_IMAGE_URL = "https://cdn.lynq.com/logos/lynq.png";
+  private static final String COMPANY_ID = "22222222-2222-2222-2222-222222222222";
+
+  private static final String JOB_TITLE = "Senior Backend Engineer";
+  private static final String JOB_DESCRIPTION = "Build and scale the Lynq hiring platform.";
+  private static final WorkType JOB_WORK_TYPE = WorkType.REMOTE;
+  private static final Integer JOB_SALARY_RANGE_DOWN = 80000;
+  private static final Integer JOB_SALARY_RANGE_TOP = 120000;
+  private static final JobPostType JOB_POST_TYPE = JobPostType.LYNQ;
+  private static final List<String> JOB_SKILLS = List.of("Java", "Spring", "PostgreSQL");
 
   @LocalServerPort
   private int port;
@@ -71,11 +89,19 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   @Autowired
   private CompanyRepository companyRepository;
 
+  @Autowired
+  private JobPostRepository jobPostRepository;
+
+  @Autowired
+  private JobPostSkillRepository jobPostSkillRepository;
+
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
   @BeforeEach
   void setUp() {
     lynqIamMock.reset();
+    jobPostSkillRepository.deleteAll();
+    jobPostRepository.deleteAll();
     companyRepository.deleteAll();
     userRepository.deleteAll();
   }
@@ -179,6 +205,124 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     assertThat(companyRepository.count(), is(0L));
   }
 
+  @Test
+  void createJobPersistsJobForCompanyOwnerAndReturnsCreated() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    seedCompanyOwnerWithCompany();
+
+    HttpResponse<String> response = postCreateJob();
+
+    assertThat(response.statusCode(), is(201));
+    Map<String, Object> body = parse(response.body());
+    assertThat(body.get("success"), is(true));
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> data = (Map<String, Object>) body.get("data");
+    String jobId = (String) data.get("jobId");
+    assertThat(jobId, is(notNullValue()));
+    assertThat(data.get("title"), is(JOB_TITLE));
+    assertThat(data.get("description"), is(JOB_DESCRIPTION));
+    assertThat(data.get("workType"), is(JOB_WORK_TYPE.name()));
+    assertThat(data.get("salaryRangeDown"), is(JOB_SALARY_RANGE_DOWN));
+    assertThat(data.get("salaryRangeTop"), is(JOB_SALARY_RANGE_TOP));
+    assertThat(data.get("jobPostType"), is(JOB_POST_TYPE.name()));
+    assertThat(data.get("createdOn"), is(notNullValue()));
+    assertThat(data.get("companyId"), is(COMPANY_ID));
+    assertThat(data.get("createdByUserId"), is(USER_ID));
+
+    Optional<JobPostEntity> persisted = jobPostRepository.findById(jobId);
+    assertThat(persisted.isPresent(), is(true));
+    assertThat(persisted.get().getTitle(), is(JOB_TITLE));
+    assertThat(persisted.get().getWorkType(), is(JOB_WORK_TYPE));
+    assertThat(persisted.get().getCompany().getId(), is(COMPANY_ID));
+    assertThat(persisted.get().getCreatedByUser().getId(), is(USER_ID));
+  }
+
+  @Test
+  void createJobPersistsJobWithSkillsWhenSkillsProvided() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    seedCompanyOwnerWithCompany();
+
+    HttpResponse<String> response = postCreateJob(JOB_SKILLS);
+
+    assertThat(response.statusCode(), is(201));
+    Map<String, Object> body = parse(response.body());
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> data = (Map<String, Object>) body.get("data");
+    String jobId = (String) data.get("jobId");
+    assertThat(data.get("skills"), is(JOB_SKILLS));
+
+    assertThat(jobPostSkillRepository.count(), is(3L));
+    List<String> persistedSkills = jobPostSkillRepository.findAll().stream()
+        .filter(skill -> skill.getJobPost().getId().equals(jobId))
+        .map(skill -> skill.getSkill())
+        .sorted()
+        .toList();
+    assertThat(persistedSkills, contains("Java", "PostgreSQL", "Spring"));
+  }
+
+  @Test
+  void createJobReturnsBadRequestWhenUserIsNotCompanyType() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    userRepository.save(UserEntity.builder()
+        .id(USER_ID)
+        .type(UserType.CANDIDATE)
+        .createdOn(LocalDate.now())
+        .build());
+
+    HttpResponse<String> response = postCreateJob();
+
+    assertThat(response.statusCode(), is(400));
+    assertThat(parse(response.body()).get("success"), is(false));
+    assertThat(jobPostRepository.count(), is(0L));
+  }
+
+  @Test
+  void createJobReturnsBadRequestWhenCompanyOwnerHasNoCompany() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    userRepository.save(UserEntity.builder()
+        .id(USER_ID)
+        .type(UserType.COMPANY)
+        .createdOn(LocalDate.now())
+        .build());
+
+    HttpResponse<String> response = postCreateJob();
+
+    assertThat(response.statusCode(), is(400));
+    assertThat(parse(response.body()).get("success"), is(false));
+    assertThat(jobPostRepository.count(), is(0L));
+  }
+
+  @Test
+  void createJobReturnsUnauthorizedWhenIamRejectsToken() throws Exception {
+    stubIamInvalidToken();
+    seedCompanyOwnerWithCompany();
+
+    HttpResponse<String> response = postCreateJob();
+
+    assertThat(response.statusCode(), is(401));
+    assertThat(jobPostRepository.count(), is(0L));
+  }
+
+  private void seedCompanyOwnerWithCompany() {
+    UserEntity owner = userRepository.save(UserEntity.builder()
+        .id(USER_ID)
+        .type(UserType.COMPANY)
+        .createdOn(LocalDate.now())
+        .build());
+    companyRepository.save(CompanyEntity.builder()
+        .id(COMPANY_ID)
+        .name(COMPANY_NAME)
+        .createdOn(LocalDate.now())
+        .owner(owner)
+        .build());
+  }
+
   private HttpResponse<String> postCreateUser() throws Exception {
     HttpRequest httpRequest = HttpRequest.newBuilder()
         .uri(URI.create(createUserUrl()))
@@ -197,6 +341,21 @@ class BackendAppApplicationTests extends AbstractE2ETest {
         .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
         .header(REQUEST_UUID_HEADER, REQUEST_UUID)
         .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(validCompanyRequest())))
+        .build();
+    return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+  }
+
+  private HttpResponse<String> postCreateJob() throws Exception {
+    return postCreateJob(null);
+  }
+
+  private HttpResponse<String> postCreateJob(List<String> skills) throws Exception {
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+        .uri(URI.create(createJobUrl()))
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+        .header(REQUEST_UUID_HEADER, REQUEST_UUID)
+        .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(validJobRequest(skills))))
         .build();
     return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
   }
@@ -248,6 +407,10 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     return "http://localhost:" + port + CONTEXT_PATH + CREATE_COMPANY_PATH;
   }
 
+  private String createJobUrl() {
+    return "http://localhost:" + port + CONTEXT_PATH + CREATE_JOB_PATH;
+  }
+
   private CreateUserRequest validRequest() {
     CreateUserRequest request = new CreateUserRequest();
     request.setUserType(UserType.CANDIDATE);
@@ -271,6 +434,18 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     request.setCompanyAbout(COMPANY_ABOUT);
     request.setCompanySize(COMPANY_SIZE);
     request.setCompanyProfileImageUrl(COMPANY_PROFILE_IMAGE_URL);
+    return request;
+  }
+
+  private CreateJobRequest validJobRequest(List<String> skills) {
+    CreateJobRequest request = new CreateJobRequest();
+    request.setTitle(JOB_TITLE);
+    request.setDescription(JOB_DESCRIPTION);
+    request.setWorkType(JOB_WORK_TYPE);
+    request.setSalaryRangeDown(JOB_SALARY_RANGE_DOWN);
+    request.setSalaryRangeTop(JOB_SALARY_RANGE_TOP);
+    request.setJobPostType(JOB_POST_TYPE);
+    request.setSkills(skills);
     return request;
   }
 }

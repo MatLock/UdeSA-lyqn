@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS lynq_backend_db.job_posts (
     title               VARCHAR(255) NOT NULL,
     description         TEXT,
     work_type           ENUM('REMOTE', 'IN_OFFICE') NOT NULL,
-    salary_range_lower  INT,
+    salary_range_down  INT,
     salary_range_top    INT,
     job_url             VARCHAR(2048),
     job_post_source       ENUM('LYNQ', 'LINKEDIN', 'COMPUTRABAJO', 'BUMERAN') NOT NULL,

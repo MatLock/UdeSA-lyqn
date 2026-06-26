@@ -1,0 +1,32 @@
+package com.lynq.backend.controller.response;
+
+import com.lynq.backend.enums.JobPostType;
+import com.lynq.backend.enums.WorkType;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CreateJobRestResponse {
+
+  private String jobId;
+  private String title;
+  private String description;
+  private WorkType workType;
+  private Integer salaryRangeDown;
+  private Integer salaryRangeTop;
+  private JobPostType jobPostType;
+  private LocalDate createdOn;
+  private String companyId;
+  private String createdByUserId;
+  private List<String> skills;
+
+}

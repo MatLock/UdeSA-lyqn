@@ -78,3 +78,18 @@ creates a new userEntity and save it into database"
 "25-06-2026","modify test AuthHeaderExistenceFilterTest.doFilterInternalSerializesErrorResponseWithExpectedReasonAndFlagsWhenHeaderMissing. objectMapper is not a concrete instance"
 "25-06-2026","add unit test for ControllerExceptionHandler"
 "25-06-2026","git status"
+"26-06-2026","create new method in class JobService that creates a jobEntity and store it in db. 
+parameters:
+ - title [string]
+ - description [String]
+ - workType [WorkType]
+ - salaryRangeDown [Integer]
+ - salaryRangeTop [Integer]
+ - jobPostType [jobPostType]
+ - user [UserEntity - must be taken from security context]
+ - company [CompanyEntity - must be inferred from user] (only users linked to a company can create job) throw BadRequestException if the user is not of type COMPANY - add validation""26-06-2026","make exception messages to be constants instead of hardcoding the message value"
+"26-06-2026","add JunitTest new method `createJob`  in class JobService"
+"26-06-2026","create new method in JobControllerImpl that calls jobService.createJob(..). all the parameters that jobService requires should come from a requestObject in requestBody"
+"26-06-2026","add JunitTest for method createJob in JobControllerImpl"
+"26-06-2026","add new Integration Tests in class BackendAppApplicationTests to contemplate new endpoint to create a job"
+"26-06-2026","alter method createJob -> make the request to also have an optional field of type List<String> denoting JobPostSkillEntity. if the list is present it should create the skills for the job and save it in the database"
