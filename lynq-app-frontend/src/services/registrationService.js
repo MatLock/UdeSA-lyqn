@@ -12,7 +12,7 @@
 import authService from './authService';
 
 const APP_BASE_URL =
-  import.meta.env.VITE_APP_BASE_URL ?? 'http://localhost:8082/lynq-backend-app';
+  import.meta.env.LYNQ_BACKEND_BASE_URL ?? 'http://localhost:8082/lynq-backend-app';
 
 /**
  * POST to a secured app-backend endpoint with the bearer token and the required

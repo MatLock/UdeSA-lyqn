@@ -2,7 +2,7 @@
 // Spec: lynq-iam/iam_openapi.yaml
 
 const IAM_BASE_URL =
-  import.meta.env.VITE_IAM_BASE_URL ?? 'http://localhost:8080/lynq-iam';
+  import.meta.env.LYNQ_IAM_BASE_URL ?? 'http://localhost:8080/lynq-iam';
 
 /**
  * Shared login request against the lynq-iam auth endpoints. All login endpoints

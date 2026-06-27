@@ -30,3 +30,6 @@ date,prompt
 "27-06-2026","in login page add a check component with legend ES: recordarme? EN: remember me?"
 "27-06-2026","In register page add password validation to match the requirements for the backend in AuthController.java"
 "27-06-2026","add valid url validation on steps 3 and 4 in register flow"
+"27-06-2026","add docker file for lynq-app-frontend"
+"27-06-2026","rename these env vars VITE_IAM_BASE_URL => LYNQ_IAM_BASE_URL, VITE_APP_BASE_URL => LYNQ_BACKEND_BASE_URL"
+"27-06-2026","include lyqn-app-frontend docker into the docker-compose.yml"
