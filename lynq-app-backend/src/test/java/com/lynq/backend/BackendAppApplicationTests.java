@@ -3,6 +3,7 @@ package com.lynq.backend;
 import com.lynq.backend.controller.request.CreateJobRequest;
 import com.lynq.backend.controller.request.CreateUserRequest;
 import com.lynq.backend.controller.request.CreateUserWithCompanyRequest;
+import com.lynq.backend.controller.request.UpdateUserProfileRequest;
 import com.lynq.backend.enums.JobPostType;
 import com.lynq.backend.enums.UserType;
 import com.lynq.backend.enums.WorkType;
@@ -57,6 +58,9 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   private static final String EMAIL = "jane@lynq.com";
 
   private static final String CURRENT_POSITION = "Backend Engineer";
+  private static final String FULL_NAME = "Jane Doe";
+  private static final String UPDATED_FULL_NAME = "Jane Q. Doe";
+  private static final String UPDATED_CURRENT_POSITION = "Staff Engineer";
   private static final String ABOUT = "Java developer focused on distributed systems.";
   private static final String PROFILE_IMAGE_URL = "https://cdn.lynq.com/avatars/jane.png";
   private static final String GITHUB_URL = "https://github.com/janedoe";
@@ -121,6 +125,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     Map<String, Object> data = (Map<String, Object>) body.get("data");
     assertThat(data.get("id"), is(USER_ID));
     assertThat(data.get("userType"), is(UserType.CANDIDATE.name()));
+    assertThat(data.get("fullName"), is(FULL_NAME));
     assertThat(data.get("currentPosition"), is(CURRENT_POSITION));
     assertThat(data.get("about"), is(ABOUT));
     assertThat(data.get("birthDate"), is(BIRTH_DATE.toString()));
@@ -129,6 +134,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     Optional<UserEntity> persisted = userRepository.findById(USER_ID);
     assertThat(persisted.isPresent(), is(true));
     assertThat(persisted.get().getCurrentPosition(), is(CURRENT_POSITION));
+    assertThat(persisted.get().getFullName(), is(FULL_NAME));
     assertThat(persisted.get().getType(), is(UserType.CANDIDATE));
   }
 
@@ -140,6 +146,63 @@ class BackendAppApplicationTests extends AbstractE2ETest {
 
     assertThat(response.statusCode(), is(401));
     assertThat(userRepository.findById(USER_ID).isPresent(), is(false));
+  }
+
+  @Test
+  void updateUserProfileAuthenticatesAppliesSuppliedFieldsAndReturnsOk() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    seedCandidateUser();
+
+    UpdateUserProfileRequest updateRequest = new UpdateUserProfileRequest();
+    updateRequest.setFullName(UPDATED_FULL_NAME);
+    updateRequest.setCurrentPosition(UPDATED_CURRENT_POSITION);
+
+    HttpResponse<String> response = patchUserProfile(updateRequest);
+
+    assertThat(response.statusCode(), is(200));
+    Map<String, Object> body = parse(response.body());
+    assertThat(body.get("success"), is(true));
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> data = (Map<String, Object>) body.get("data");
+    assertThat(data.get("id"), is(USER_ID));
+    assertThat(data.get("fullName"), is(UPDATED_FULL_NAME));
+    assertThat(data.get("currentPosition"), is(UPDATED_CURRENT_POSITION));
+    assertThat(data.get("about"), is(ABOUT));
+
+    UserEntity persisted = userRepository.findById(USER_ID).orElseThrow();
+    assertThat(persisted.getFullName(), is(UPDATED_FULL_NAME));
+    assertThat(persisted.getCurrentPosition(), is(UPDATED_CURRENT_POSITION));
+    assertThat(persisted.getAbout(), is(ABOUT));
+  }
+
+  @Test
+  void updateUserProfileReturnsNotFoundWhenUserDoesNotExist() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+
+    UpdateUserProfileRequest updateRequest = new UpdateUserProfileRequest();
+    updateRequest.setFullName(UPDATED_FULL_NAME);
+
+    HttpResponse<String> response = patchUserProfile(updateRequest);
+
+    assertThat(response.statusCode(), is(404));
+    assertThat(parse(response.body()).get("success"), is(false));
+  }
+
+  @Test
+  void updateUserProfileReturnsUnauthorizedWhenIamRejectsToken() throws Exception {
+    stubIamInvalidToken();
+    seedCandidateUser();
+
+    UpdateUserProfileRequest updateRequest = new UpdateUserProfileRequest();
+    updateRequest.setFullName(UPDATED_FULL_NAME);
+
+    HttpResponse<String> response = patchUserProfile(updateRequest);
+
+    assertThat(response.statusCode(), is(401));
+    assertThat(userRepository.findById(USER_ID).orElseThrow().getFullName(), is(FULL_NAME));
   }
 
   @Test
@@ -323,6 +386,32 @@ class BackendAppApplicationTests extends AbstractE2ETest {
         .build());
   }
 
+  private void seedCandidateUser() {
+    userRepository.save(UserEntity.builder()
+        .id(USER_ID)
+        .type(UserType.CANDIDATE)
+        .fullName(FULL_NAME)
+        .profileImageUrl(PROFILE_IMAGE_URL)
+        .currentPosition(CURRENT_POSITION)
+        .about(ABOUT)
+        .githubUrl(GITHUB_URL)
+        .linkedinUrl(LINKEDIN_URL)
+        .birthDate(BIRTH_DATE)
+        .createdOn(LocalDate.now())
+        .build());
+  }
+
+  private HttpResponse<String> patchUserProfile(UpdateUserProfileRequest updateRequest) throws Exception {
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+        .uri(URI.create(createUserUrl()))
+        .header(CONTENT_TYPE_HEADER, APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+        .header(REQUEST_UUID_HEADER, REQUEST_UUID)
+        .method("PATCH", HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(updateRequest)))
+        .build();
+    return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+  }
+
   private HttpResponse<String> postCreateUser() throws Exception {
     HttpRequest httpRequest = HttpRequest.newBuilder()
         .uri(URI.create(createUserUrl()))
@@ -414,6 +503,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   private CreateUserRequest validRequest() {
     CreateUserRequest request = new CreateUserRequest();
     request.setUserType(UserType.CANDIDATE);
+    request.setFullName(FULL_NAME);
     request.setUserProfileImageUrl(PROFILE_IMAGE_URL);
     request.setCurrentPosition(CURRENT_POSITION);
     request.setAbout(ABOUT);

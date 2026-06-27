@@ -1,6 +1,8 @@
 package com.lynq.backend.service;
 
+import com.lynq.backend.controller.request.UpdateUserProfileRequest;
 import com.lynq.backend.enums.UserType;
+import com.lynq.backend.exceptions.NotFoundException;
 import com.lynq.backend.model.UserEntity;
 import com.lynq.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +13,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +29,7 @@ class UserServiceTest {
 
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final UserType USER_TYPE = UserType.CANDIDATE;
+  private static final String FULL_NAME = "Jane Doe";
   private static final String PROFILE_IMAGE_URL = "https://cdn.lynq.com/avatars/jane.png";
   private static final String CURRENT_POSITION = "Backend Engineer";
   private static final String ABOUT = "Java developer focused on distributed systems.";
@@ -31,8 +37,14 @@ class UserServiceTest {
   private static final String LINKEDIN_URL = "https://linkedin.com/in/janedoe";
   private static final LocalDate BIRTH_DATE = LocalDate.of(1995, 4, 12);
 
+  private static final String UPDATED_FULL_NAME = "Jane Q. Doe";
+  private static final String UPDATED_CURRENT_POSITION = "Staff Engineer";
+
   @Mock
   private UserRepository userRepository;
+
+  @Mock
+  private UpdateUserProfileRequest updateRequest;
 
   private UserService userService;
 
@@ -46,13 +58,14 @@ class UserServiceTest {
     when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
 
-    userService.saveNewUser(USER_ID, USER_TYPE, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
 
     verify(userRepository).save(userCaptor.capture());
     UserEntity saved = userCaptor.getValue();
     assertThat(saved.getId(), is(USER_ID));
     assertThat(saved.getType(), is(USER_TYPE));
+    assertThat(saved.getFullName(), is(FULL_NAME));
     assertThat(saved.getProfileImageUrl(), is(PROFILE_IMAGE_URL));
     assertThat(saved.getCurrentPosition(), is(CURRENT_POSITION));
     assertThat(saved.getAbout(), is(ABOUT));
@@ -66,7 +79,7 @@ class UserServiceTest {
     when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
 
-    userService.saveNewUser(USER_ID, USER_TYPE, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
 
     verify(userRepository).save(userCaptor.capture());
@@ -78,9 +91,83 @@ class UserServiceTest {
     UserEntity persisted = UserEntity.builder().id(USER_ID).build();
     when(userRepository.save(any(UserEntity.class))).thenReturn(persisted);
 
-    UserEntity result = userService.saveNewUser(USER_ID, USER_TYPE, PROFILE_IMAGE_URL,
+    UserEntity result = userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL,
         CURRENT_POSITION, ABOUT, GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
 
     assertThat(result, is(sameInstance(persisted)));
+  }
+
+  @Test
+  void updateUserProfileAppliesSuppliedFieldsToExistingUser() {
+    UserEntity existing = existingUser();
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(updateRequest.getFullName()).thenReturn(UPDATED_FULL_NAME);
+    when(updateRequest.getCurrentPosition()).thenReturn(UPDATED_CURRENT_POSITION);
+    ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
+
+    userService.updateUserProfile(USER_ID, updateRequest);
+
+    verify(userRepository).save(userCaptor.capture());
+    UserEntity saved = userCaptor.getValue();
+    assertThat(saved.getFullName(), is(UPDATED_FULL_NAME));
+    assertThat(saved.getCurrentPosition(), is(UPDATED_CURRENT_POSITION));
+  }
+
+  @Test
+  void updateUserProfileLeavesOmittedFieldsUnchanged() {
+    UserEntity existing = existingUser();
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(updateRequest.getFullName()).thenReturn(UPDATED_FULL_NAME);
+    ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
+
+    userService.updateUserProfile(USER_ID, updateRequest);
+
+    verify(userRepository).save(userCaptor.capture());
+    UserEntity saved = userCaptor.getValue();
+    assertThat(saved.getFullName(), is(UPDATED_FULL_NAME));
+    assertThat(saved.getCurrentPosition(), is(CURRENT_POSITION));
+    assertThat(saved.getAbout(), is(ABOUT));
+    assertThat(saved.getGithubUrl(), is(GITHUB_URL));
+    assertThat(saved.getLinkedinUrl(), is(LINKEDIN_URL));
+    assertThat(saved.getProfileImageUrl(), is(PROFILE_IMAGE_URL));
+    assertThat(saved.getBirthDate(), is(BIRTH_DATE));
+  }
+
+  @Test
+  void updateUserProfileReturnsEntityProducedByRepository() {
+    UserEntity existing = existingUser();
+    UserEntity persisted = UserEntity.builder().id(USER_ID).build();
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(userRepository.save(any(UserEntity.class))).thenReturn(persisted);
+
+    UserEntity result = userService.updateUserProfile(USER_ID, updateRequest);
+
+    assertThat(result, is(sameInstance(persisted)));
+  }
+
+  @Test
+  void updateUserProfileThrowsNotFoundWhenUserDoesNotExist() {
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class,
+        () -> userService.updateUserProfile(USER_ID, updateRequest));
+    verify(userRepository, never()).save(any());
+  }
+
+  private UserEntity existingUser() {
+    return UserEntity.builder()
+        .id(USER_ID)
+        .type(USER_TYPE)
+        .fullName(FULL_NAME)
+        .profileImageUrl(PROFILE_IMAGE_URL)
+        .currentPosition(CURRENT_POSITION)
+        .about(ABOUT)
+        .githubUrl(GITHUB_URL)
+        .linkedinUrl(LINKEDIN_URL)
+        .birthDate(BIRTH_DATE)
+        .createdOn(LocalDate.of(2026, 6, 25))
+        .build();
   }
 }

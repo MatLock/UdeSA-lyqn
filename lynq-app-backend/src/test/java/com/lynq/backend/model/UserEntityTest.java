@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.notNullValue;
 class UserEntityTest {
 
   private static final String USER_ID = "11111111-1111-1111-1111-111111111111";
+  private static final String FULL_NAME = "Ada Lovelace";
   private static final UserType USER_TYPE = UserType.CANDIDATE;
   private static final String PROFILE_IMAGE_URL = "https://cdn.lynq.ai/users/avatar.png";
   private static final String CURRENT_POSITION = "Senior Software Engineer";
@@ -38,6 +39,7 @@ class UserEntityTest {
   void setUp() {
     userEntity = UserEntity.builder()
         .id(USER_ID)
+        .fullName(FULL_NAME)
         .type(USER_TYPE)
         .profileImageUrl(PROFILE_IMAGE_URL)
         .currentPosition(CURRENT_POSITION)
@@ -52,6 +54,7 @@ class UserEntityTest {
   @Test
   void builderPopulatesAllScalarFields() {
     assertThat(userEntity.getId(), is(USER_ID));
+    assertThat(userEntity.getFullName(), is(FULL_NAME));
     assertThat(userEntity.getType(), is(USER_TYPE));
     assertThat(userEntity.getProfileImageUrl(), is(PROFILE_IMAGE_URL));
     assertThat(userEntity.getCurrentPosition(), is(CURRENT_POSITION));

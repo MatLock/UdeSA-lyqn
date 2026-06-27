@@ -41,6 +41,7 @@ class CompanyServiceTest {
   private static final Integer COMPANY_SIZE = 250;
   private static final String COMPANY_PROFILE_IMAGE_URL = "https://cdn.lynq.com/logos/lynq.png";
   private static final String NO_GITHUB_URL = null;
+  private static final String NO_FULL_NAME = null;
 
   @Mock
   private UserService userService;
@@ -64,7 +65,7 @@ class CompanyServiceTest {
 
     companyService.createUserWithCompany(USER_ID, request);
 
-    verify(userService).saveNewUser(USER_ID, UserType.COMPANY, USER_PROFILE_IMAGE_URL,
+    verify(userService).saveNewUser(USER_ID, UserType.COMPANY, NO_FULL_NAME, USER_PROFILE_IMAGE_URL,
         CURRENT_POSITION, USER_ABOUT, NO_GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
   }
 
@@ -72,7 +73,7 @@ class CompanyServiceTest {
   void createUserWithCompanyPersistsCompanyBuiltFromRequestAndOwner() {
     stubRequestFields();
     UserEntity owner = UserEntity.builder().id(USER_ID).build();
-    when(userService.saveNewUser(USER_ID, UserType.COMPANY, USER_PROFILE_IMAGE_URL,
+    when(userService.saveNewUser(USER_ID, UserType.COMPANY, NO_FULL_NAME, USER_PROFILE_IMAGE_URL,
         CURRENT_POSITION, USER_ABOUT, NO_GITHUB_URL, LINKEDIN_URL, BIRTH_DATE)).thenReturn(owner);
     when(companyRepository.save(any(CompanyEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -133,7 +134,7 @@ class CompanyServiceTest {
     assertThrows(BadRequestException.class,
         () -> companyService.createUserWithCompany(USER_ID, request));
 
-    verify(userService, never()).saveNewUser(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(userService, never()).saveNewUser(any(), any(), any(), any(), any(), any(), any(), any(), any());
     verify(companyRepository, never()).save(any());
   }
 
