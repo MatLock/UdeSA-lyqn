@@ -1,0 +1,11 @@
+date,prompt
+"26-06-2026","we are going to start working in lynq-app-frontend"
+"27-06-2026","Save standing project instructions: (1) brand colors light blue + purple, parametrized; (2) respect folder structure (components/pages/etc); (3) each component/page has its own css file inheriting from index.css; (4) each component/page has its own .js behaviour file. Save for all future sessions."
+"27-06-2026","add function user_authenticate in auth_service.js with parameters username[string], password[string]; it calls endpoint /auth/login/username per the iam_openapi.yaml spec in lynq-iam."
+"27-06-2026","Convention for all future functions: declare the functions and export them all together in an object at the end of the file."
+"27-06-2026","do the same for email_authenticate. Endpoint specification is in the same file."
+"27-06-2026","implement /auth/validate and /auth/userinfo"
+"27-06-2026","implement user_register: a function that takes all userInfo and calls /auth/register endpoint. Use another fetch call."
+"27-06-2026","implement user_update_password: a function that calls /auth/update-password and generates a new password, refresh token and access token. Use a new fetch call."
+"27-06-2026","implement function refresh_access_token: takes a refresh_token[string], calls /auth/refresh to generate a new access token and returns this value in a promise."
+"27-06-2026","implement /auth/validate and /auth/user-info"
