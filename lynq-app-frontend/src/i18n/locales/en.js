@@ -80,6 +80,7 @@ const en = {
       errors: {
         positionRequired: 'Enter your role',
         aboutRequired: 'Tell us about you',
+        linkedinInvalid: 'Enter a valid URL',
       },
     },
     companyDetails: {
@@ -96,6 +97,7 @@ const en = {
         aboutRequired: 'Tell us about the company',
         sizeRequired: 'Enter the number of employees',
         sizeInvalid: 'Enter a whole number greater than 0',
+        logoInvalid: 'Enter a valid URL',
       },
     },
   },

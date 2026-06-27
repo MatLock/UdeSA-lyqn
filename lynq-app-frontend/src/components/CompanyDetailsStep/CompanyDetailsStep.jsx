@@ -6,6 +6,7 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import useRegister from '../../hooks/useRegister'
 import useRegisterSubmit from '../../hooks/useRegisterSubmit'
 import registrationService from '../../services/registrationService'
+import urlUtils from '../../utils/url'
 import Toast from '../Toast/Toast'
 import strings from '../../i18n'
 import './CompanyDetailsStep.css'
@@ -35,6 +36,9 @@ const CompanyDetailsStep = ({ active }) => {
     const size = Number(companySize)
     if (!companySize) errors.companySize = cd.errors.sizeRequired
     else if (!Number.isInteger(size) || size <= 0) errors.companySize = cd.errors.sizeInvalid
+    // Logo URL is optional, but if provided it must be a valid URL.
+    if (companyProfileImageUrl.trim() && !urlUtils.isValidUrl(companyProfileImageUrl.trim()))
+      errors.companyProfileImageUrl = cd.errors.logoInvalid
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -157,9 +161,13 @@ const CompanyDetailsStep = ({ active }) => {
               type="url"
               placeholder={cd.logoPlaceholder}
               value={companyProfileImageUrl}
+              aria-invalid={Boolean(fieldErrors.companyProfileImageUrl)}
               onChange={(event) => setCompanyProfileImageUrl(event.target.value)}
             />
           </div>
+          {fieldErrors.companyProfileImageUrl && (
+            <p className="company-error" role="alert">{fieldErrors.companyProfileImageUrl}</p>
+          )}
         </div>
 
         {/* Hidden submit keeps Enter-to-submit working; visible buttons are in

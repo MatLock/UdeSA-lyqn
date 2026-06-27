@@ -3,6 +3,7 @@ import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
 import useRegister from '../../hooks/useRegister'
+import urlUtils from '../../utils/url'
 import strings from '../../i18n'
 import './OwnerProfileStep.css'
 
@@ -23,6 +24,9 @@ const OwnerProfileStep = ({ active }) => {
     const errors = {}
     if (!currentPosition.trim()) errors.currentPosition = op.errors.positionRequired
     if (!userAbout.trim()) errors.userAbout = op.errors.aboutRequired
+    // LinkedIn is optional, but if provided it must be a valid URL.
+    if (linkedinUrl.trim() && !urlUtils.isValidUrl(linkedinUrl.trim()))
+      errors.linkedinUrl = op.errors.linkedinInvalid
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -103,9 +107,13 @@ const OwnerProfileStep = ({ active }) => {
               type="url"
               placeholder={op.linkedinPlaceholder}
               value={linkedinUrl}
+              aria-invalid={Boolean(fieldErrors.linkedinUrl)}
               onChange={(event) => setLinkedinUrl(event.target.value)}
             />
           </div>
+          {fieldErrors.linkedinUrl && (
+            <p className="owner-error" role="alert">{fieldErrors.linkedinUrl}</p>
+          )}
         </div>
 
         {/* Hidden submit keeps Enter-to-advance working; visible buttons are in

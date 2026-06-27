@@ -80,6 +80,7 @@ const es = {
       errors: {
         positionRequired: 'Ingresá tu cargo',
         aboutRequired: 'Contanos sobre vos',
+        linkedinInvalid: 'Ingresá una URL válida',
       },
     },
     companyDetails: {
@@ -96,6 +97,7 @@ const es = {
         aboutRequired: 'Contanos sobre la empresa',
         sizeRequired: 'Ingresá la cantidad de empleados',
         sizeInvalid: 'Ingresá un número entero mayor a 0',
+        logoInvalid: 'Ingresá una URL válida',
       },
     },
   },
