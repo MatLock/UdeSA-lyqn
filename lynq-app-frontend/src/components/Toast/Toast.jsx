@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import strings from '../../i18n'
 import './Toast.css'
 
@@ -17,7 +18,9 @@ const Toast = ({
 
   if (!message) return null
 
-  return (
+  // Portal to <body> so the fixed-position toast isn't positioned/clipped by a
+  // transformed, overflow-hidden ancestor (e.g. the register carousel track).
+  return createPortal(
     <div className={`toast toast-${type}`} role="alert">
       <span className="toast-message">{message}</span>
       <button
@@ -28,7 +31,8 @@ const Toast = ({
       >
         ×
       </button>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

@@ -1,0 +1,30 @@
+/* AuthHeading — static title + subtitle for auth screens. Tokens from index.css. */
+
+.auth-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-heading-title {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  color: var(--text-h);
+  margin: 2px 0 0;
+}
+
+.auth-heading-subtitle {
+  color: var(--text);
+  font-style: italic;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+@media (max-width: 640px) {
+  .auth-heading-title {
+    font-size: 8px;
+  }
+}

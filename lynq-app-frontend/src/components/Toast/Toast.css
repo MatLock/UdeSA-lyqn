@@ -2,7 +2,7 @@
 
 .toast {
   position: fixed;
-  top: 24px;
+  bottom: 24px;
   right: 24px;
   z-index: 1000;
   display: flex;
@@ -51,7 +51,7 @@
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

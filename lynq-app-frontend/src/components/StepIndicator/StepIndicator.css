@@ -1,0 +1,10 @@
+/* StepIndicator — register progress label. Tokens from index.css. */
+
+.step-indicator {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--brand-purple);
+}

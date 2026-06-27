@@ -131,45 +131,8 @@
   color: var(--text);
 }
 
-.account-type-actions {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 28px;
-}
-
-.account-type-actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-width: 300px;
-  font: inherit;
-  font-size: 16px;
-  padding: 14px 24px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  color: #fff;
-  background: var(--brand-gradient);
-  transition: opacity 0.15s ease;
-}
-
-.account-type-actions button:hover:not(:disabled) {
-  opacity: 0.92;
-}
-
-.account-type-actions button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 @media (max-width: 560px) {
   .account-type-options {
     flex-direction: column;
-  }
-
-  .account-type-actions button {
-    min-width: 100%;
   }
 }

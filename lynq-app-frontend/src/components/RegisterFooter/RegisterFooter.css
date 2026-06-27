@@ -1,0 +1,57 @@
+/* RegisterFooter — static action bar below the carousel. Tokens from index.css. */
+
+.register-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 28px;
+  padding-bottom: 8px;
+}
+
+.register-footer button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.register-footer-next {
+  min-width: 180px;
+  border: none;
+  color: #fff;
+  background: var(--brand-gradient);
+}
+
+.register-footer-next:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.register-footer-back {
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--text-h);
+}
+
+.register-footer-back:hover:not(:disabled) {
+  border-color: var(--brand-purple-light);
+}
+
+.register-footer button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  .register-footer-next {
+    min-width: 0;
+    flex: 1;
+  }
+}

@@ -1,17 +1,14 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded'
 import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
-import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
-import strings from '../../../i18n'
-import useRegister from '../../../hooks/useRegister'
+import strings from '../../i18n'
+import useRegister from '../../hooks/useRegister'
 import './AccountTypeStep.css'
 
-const AccountTypeStep = () => {
+const AccountTypeStep = ({ active }) => {
   const t = strings.register
-  const navigate = useNavigate()
-  const { data, updateData } = useRegister()
+  const { data, updateData, next, setFooter } = useRegister()
   const [accountType, setAccountType] = useState(data.accountType || '')
 
   const options = [
@@ -31,11 +28,22 @@ const AccountTypeStep = () => {
     },
   ]
 
-  const handleNext = () => {
-    if (!accountType) return
-    updateData({ accountType })
-    navigate('/register/step-2')
-  }
+  // Drive the shared footer while this is the active step. Re-runs when the
+  // selection changes so the Next button's enabled state stays in sync.
+  useEffect(() => {
+    if (!active) return
+    setFooter({
+      primary: {
+        label: t.next,
+        disabled: !accountType,
+        onClick: () => {
+          if (!accountType) return
+          updateData({ accountType })
+          next()
+        },
+      },
+    })
+  }, [active, accountType, updateData, next, setFooter, t.next])
 
   return (
     <div className="account-type-step">
@@ -59,7 +67,12 @@ const AccountTypeStep = () => {
                 name="accountType"
                 value={value}
                 checked={selected}
-                onChange={(event) => setAccountType(event.target.value)}
+                onChange={(event) => {
+                  setAccountType(event.target.value)
+                  // Persist immediately so the step counter (2 vs 3) reflects the
+                  // choice right away, before advancing.
+                  updateData({ accountType: event.target.value })
+                }}
               />
               <span className="account-type-radio" aria-hidden="true" />
               <span className="account-type-icon">
@@ -78,13 +91,6 @@ const AccountTypeStep = () => {
         <LockOutlinedIcon sx={{ fontSize: 16 }} />
         {t.accountType.changeNote}
       </p>
-
-      <div className="account-type-actions">
-        <button type="button" onClick={handleNext} disabled={!accountType}>
-          {t.next}
-          <ArrowForwardRoundedIcon sx={{ fontSize: 20 }} />
-        </button>
-      </div>
     </div>
   )
 }

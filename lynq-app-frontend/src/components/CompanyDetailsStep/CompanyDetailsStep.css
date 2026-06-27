@@ -1,0 +1,107 @@
+/* CompanyDetailsStep — company-only 3rd register step. Mirrors the compact field
+   design from DetailsStep; tokens from index.css. */
+
+.company-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.company-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+}
+
+/* label on top, then an icon + control row that stays vertically centered. */
+.company-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  /* --icon-col = icon width (26) + control gap (8); aligns label/error to input. */
+  --icon-col: 34px;
+}
+
+.company-field > label {
+  color: var(--text-h);
+  font-size: 12px;
+  margin-left: var(--icon-col);
+}
+
+.company-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.company-field-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.company-field-icon.tone-blue {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--brand-blue-dark);
+}
+
+.company-field-icon.tone-purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--brand-purple);
+}
+
+.company-control > input,
+.company-control > select {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+}
+
+.company-control > select {
+  cursor: pointer;
+}
+
+.company-control > input:focus,
+.company-control > select:focus {
+  border-color: var(--brand-purple);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.company-control > input[aria-invalid='true'],
+.company-control > select[aria-invalid='true'] {
+  border-color: #ef4444;
+}
+
+.company-error {
+  color: #ef4444;
+  font-size: 11px;
+  margin: 0 0 0 var(--icon-col);
+}
+
+/* Visually-hidden submit so Enter still submits; visible buttons are in the
+   static RegisterFooter. */
+.company-hidden-submit {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
