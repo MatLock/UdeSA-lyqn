@@ -93,3 +93,6 @@ parameters:
 "26-06-2026","add JunitTest for method createJob in JobControllerImpl"
 "26-06-2026","add new Integration Tests in class BackendAppApplicationTests to contemplate new endpoint to create a job"
 "26-06-2026","alter method createJob -> make the request to also have an optional field of type List<String> denoting JobPostSkillEntity. if the list is present it should create the skills for the job and save it in the database"
+"27-06-2026","add Full Name to userEntity"
+"27-06-2026","add fullName as part of the request of `createUser`"
+"27-06-2026","create a new endpoint. PATCH to modify userProfile fields. fields allowed to be modified in the request. birthDate, linkedinUrl, githubUrl, about, currentPosition, userProfileImageUrl, fullName""27-06-2026","how can I generate openapi specification of all the endpoints in this service"

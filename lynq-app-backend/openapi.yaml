@@ -1,0 +1,589 @@
+openapi: 3.1.0
+info:
+  title: lynq-app-backend
+  description: Identity and Access Management service for the Lynq platform
+  version: v1
+servers:
+- url: http://localhost:8085/lynq-backend-app
+  description: Generated server url
+tags:
+- name: Job
+  description: Operations for managing Lynq platform job posts
+- name: Company
+  description: Operations for managing Lynq platform companies
+- name: User
+  description: Operations for managing Lynq platform users
+paths:
+  /user:
+    post:
+      tags:
+      - User
+      summary: Create a new user
+      description: "Creates the profile of the authenticated user. The user identity\
+        \ is resolved from the bearer token, so only the profile fields are supplied\
+        \ in the request body."
+      operationId: createUser
+      parameters:
+      - name: lynq-request-uuid
+        in: header
+        description: "Unique identifier for the request, echoed back in the response\
+          \ and used for log correlation. Requests without it are rejected with 403."
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+      requestBody:
+        description: Profile details for the new user
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+            examples:
+              Candidate profile:
+                description: Candidate profile
+                value:
+                  userType: CANDIDATE
+                  userProfileImageUrl: https://cdn.lynq.com/avatars/jane.png
+                  currentPosition: Backend Engineer
+                  about: Java developer focused on distributed systems.
+                  githubUrl: https://github.com/janedoe
+                  linkedinUrl: https://linkedin.com/in/janedoe
+                  birthDate: 1995-04-12
+        required: true
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CreateUserRestResponse"
+              examples:
+                Created:
+                  description: Created
+                  value:
+                    success: true
+                    data:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      userType: CANDIDATE
+                      userProfileImageUrl: https://cdn.lynq.com/avatars/jane.png
+                      currentPosition: Backend Engineer
+                      about: Java developer focused on distributed systems.
+                      githubUrl: https://github.com/janedoe
+                      linkedinUrl: https://linkedin.com/in/janedoe
+                      birthDate: 1995-04-12
+                      createdOn: 2026-06-25
+        "400":
+          description: Validation failed on one or more request fields
+          content:
+            '*/*':
+              examples:
+                Invalid fields:
+                  description: Invalid fields
+                  value:
+                    success: false
+                    data:
+                      currentPosition: must not be blank
+                      birthDate: must not be null
+                    reason: Invalid Fields Found
+        "403":
+          description: Missing required lynq-request-uuid header
+          content:
+            '*/*':
+              examples:
+                Missing header:
+                  description: Missing header
+                  value:
+                    success: false
+                    data: null
+                    reason: Missing required header
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            '*/*':
+              examples:
+                Unauthorized:
+                  description: Unauthorized
+                  value:
+                    success: false
+                    data: null
+                    reason: Invalid or expired token
+        "500":
+          description: Unexpected server error
+          content:
+            '*/*':
+              examples:
+                Server error:
+                  description: Server error
+                  value:
+                    success: false
+                    data: null
+                    reason: Unexpected error
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - User
+      summary: Update the authenticated user's profile
+      description: Partially updates the profile of the authenticated user. The user
+        identity is resolved from the bearer token. Only the fields present in the
+        request body are modified; omitted fields keep their current value.
+      operationId: updateUserProfile
+      parameters:
+      - name: lynq-request-uuid
+        in: header
+        description: "Unique identifier for the request, echoed back in the response\
+          \ and used for log correlation. Requests without it are rejected with 403."
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+      requestBody:
+        description: Profile fields to update. Only the supplied fields are modified.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserProfileRequest"
+            examples:
+              Partial profile update:
+                description: Partial profile update
+                value:
+                  fullName: Jane Doe
+                  currentPosition: Staff Engineer
+        required: true
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UpdateUserProfileRestResponse"
+              examples:
+                Updated:
+                  description: Updated
+                  value:
+                    success: true
+                    data:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      userType: CANDIDATE
+                      fullName: Jane Doe
+                      userProfileImageUrl: https://cdn.lynq.com/avatars/jane.png
+                      currentPosition: Staff Engineer
+                      about: Java developer focused on distributed systems.
+                      githubUrl: https://github.com/janedoe
+                      linkedinUrl: https://linkedin.com/in/janedoe
+                      birthDate: 1995-04-12
+                      createdOn: 2026-06-25
+        "404":
+          description: No user exists for the authenticated identity
+          content:
+            '*/*':
+              examples:
+                User not found:
+                  description: User not found
+                  value:
+                    success: false
+                    data: null
+                    reason: User '550e8400-e29b-41d4-a716-446655440000' not found
+        "403":
+          description: Missing required lynq-request-uuid header
+          content:
+            '*/*':
+              examples:
+                Missing header:
+                  description: Missing header
+                  value:
+                    success: false
+                    data: null
+                    reason: Missing required header
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            '*/*':
+              examples:
+                Unauthorized:
+                  description: Unauthorized
+                  value:
+                    success: false
+                    data: null
+                    reason: Invalid or expired token
+        "500":
+          description: Unexpected server error
+          content:
+            '*/*':
+              examples:
+                Server error:
+                  description: Server error
+                  value:
+                    success: false
+                    data: null
+                    reason: Unexpected error
+      security:
+      - bearerAuth: []
+  /job:
+    post:
+      tags:
+      - Job
+      summary: Create a job post
+      description: Creates a job post for the company owned by the authenticated user.
+        The owner identity is resolved from the bearer token and must be a COMPANY-type
+        user linked to a company.
+      operationId: createJob
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GlobalRestResponseCreateJobRestResponse"
+      security:
+      - bearerAuth: []
+  /company:
+    post:
+      tags:
+      - Company
+      summary: Create a company together with its owner profile
+      description: "Creates the profile of the authenticated user as a COMPANY-type\
+        \ user and the company they own in a single call. The owner identity is resolved\
+        \ from the bearer token, while the company id is generated server-side."
+      operationId: createUserWithCompany
+      parameters:
+      - name: lynq-request-uuid
+        in: header
+        description: "Unique identifier for the request, echoed back in the response\
+          \ and used for log correlation. Requests without it are rejected with 403."
+        required: true
+        example: 550e8400-e29b-41d4-a716-446655440000
+      requestBody:
+        description: Owner profile details and company details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserWithCompanyRequest"
+            examples:
+              Company owner:
+                description: Company owner
+                value:
+                  userProfileImageUrl: https://cdn.lynq.com/avatars/jane.png
+                  currentPosition: Founder
+                  userAbout: Building the Lynq hiring platform.
+                  linkedinUrl: https://linkedin.com/in/janedoe
+                  birthDate: 1995-04-12
+                  companyName: Lynq
+                  companyAbout: Hiring platform for engineers.
+                  companySize: 42
+                  companyProfileImageUrl: https://cdn.lynq.com/logos/lynq.png
+        required: true
+      responses:
+        "201":
+          description: User and company created successfully
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CreateUserWithCompanyRestResponse"
+              examples:
+                Created:
+                  description: Created
+                  value:
+                    success: true
+                    data:
+                      companyId: 018f9c3a-2b1d-7c4e-9a6f-1e2d3c4b5a60
+                      companyName: Lynq
+                      companyAbout: Hiring platform for engineers.
+                      companySize: 42
+                      companyProfileImageUrl: https://cdn.lynq.com/logos/lynq.png
+                      companyCreatedOn: 2026-06-25
+                      ownerUserId: 550e8400-e29b-41d4-a716-446655440000
+        "400":
+          description: Validation failed on one or more request fields
+          content:
+            '*/*':
+              examples:
+                Invalid fields:
+                  description: Invalid fields
+                  value:
+                    success: false
+                    data:
+                      companyName: must not be blank
+                      birthDate: must not be null
+                    reason: Invalid Fields Found
+        "403":
+          description: Missing required lynq-request-uuid header
+          content:
+            '*/*':
+              examples:
+                Missing header:
+                  description: Missing header
+                  value:
+                    success: false
+                    data: null
+                    reason: Missing required header
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            '*/*':
+              examples:
+                Unauthorized:
+                  description: Unauthorized
+                  value:
+                    success: false
+                    data: null
+                    reason: Invalid or expired token
+        "500":
+          description: Unexpected server error
+          content:
+            '*/*':
+              examples:
+                Server error:
+                  description: Server error
+                  value:
+                    success: false
+                    data: null
+                    reason: Unexpected error
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      properties:
+        userType:
+          type: string
+          enum:
+          - CANDIDATE
+          - COMPANY
+        fullName:
+          type: string
+          minLength: 1
+        userProfileImageUrl:
+          type: string
+        currentPosition:
+          type: string
+        about:
+          type: string
+        githubUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        birthDate:
+          type: string
+          format: date
+      required:
+      - birthDate
+      - fullName
+      - userType
+    CreateUserRestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        userType:
+          type: string
+          enum:
+          - CANDIDATE
+          - COMPANY
+        fullName:
+          type: string
+        userProfileImageUrl:
+          type: string
+        currentPosition:
+          type: string
+        about:
+          type: string
+        githubUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        createdOn:
+          type: string
+          format: date
+    CreateJobRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+        workType:
+          type: string
+          enum:
+          - REMOTE
+          - IN_OFFICE
+        salaryRangeDown:
+          type: integer
+          format: int32
+        salaryRangeTop:
+          type: integer
+          format: int32
+        jobPostType:
+          type: string
+          enum:
+          - LYNQ
+          - LINKEDIN
+          - COMPUTRABAJO
+          - BUMERAN
+        skills:
+          type: array
+          items:
+            type: string
+      required:
+      - description
+      - jobPostType
+      - title
+      - workType
+    CreateJobRestResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        workType:
+          type: string
+          enum:
+          - REMOTE
+          - IN_OFFICE
+        salaryRangeDown:
+          type: integer
+          format: int32
+        salaryRangeTop:
+          type: integer
+          format: int32
+        jobPostType:
+          type: string
+          enum:
+          - LYNQ
+          - LINKEDIN
+          - COMPUTRABAJO
+          - BUMERAN
+        createdOn:
+          type: string
+          format: date
+        companyId:
+          type: string
+        createdByUserId:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+    GlobalRestResponseCreateJobRestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/CreateJobRestResponse"
+    CreateUserWithCompanyRequest:
+      type: object
+      properties:
+        userProfileImageUrl:
+          type: string
+        currentPosition:
+          type: string
+          minLength: 1
+        userAbout:
+          type: string
+          minLength: 1
+        linkedinUrl:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        companyName:
+          type: string
+          minLength: 1
+        companyAbout:
+          type: string
+          minLength: 1
+        companySize:
+          type: integer
+          format: int32
+        companyProfileImageUrl:
+          type: string
+      required:
+      - birthDate
+      - companyAbout
+      - companyName
+      - currentPosition
+      - userAbout
+    CreateUserWithCompanyRestResponse:
+      type: object
+      properties:
+        companyId:
+          type: string
+        companyName:
+          type: string
+        companyAbout:
+          type: string
+        companySize:
+          type: integer
+          format: int32
+        companyProfileImageUrl:
+          type: string
+        companyCreatedOn:
+          type: string
+          format: date
+        ownerUserId:
+          type: string
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        userProfileImageUrl:
+          type: string
+        currentPosition:
+          type: string
+        about:
+          type: string
+        githubUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        birthDate:
+          type: string
+          format: date
+    UpdateUserProfileRestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        userType:
+          type: string
+          enum:
+          - CANDIDATE
+          - COMPANY
+        fullName:
+          type: string
+        userProfileImageUrl:
+          type: string
+        currentPosition:
+          type: string
+        about:
+          type: string
+        githubUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        createdOn:
+          type: string
+          format: date
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: Paste the token *without* the `Bearer ` prefix — Swagger UI adds
+        it for you.
+      scheme: bearer
+      bearerFormat: JWT or opaque refresh token
