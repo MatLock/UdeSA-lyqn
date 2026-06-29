@@ -8,6 +8,7 @@ import useRegisterSubmit from '../../hooks/useRegisterSubmit'
 import registrationService from '../../services/registrationService'
 import urlUtils from '../../utils/url'
 import Toast from '../Toast/Toast'
+import StepIndicator from '../StepIndicator/StepIndicator'
 import strings from '../../i18n'
 import './CompanyDetailsStep.css'
 
@@ -15,7 +16,7 @@ import './CompanyDetailsStep.css'
 // owner profile were collected and persisted by the earlier steps, so this step
 // adds the company details and submits the whole registration (auth user +
 // owner profile + company) via registrationService.register_company.
-const CompanyDetailsStep = ({ active }) => {
+const CompanyDetailsStep = ({ active, stepNumber, totalSteps }) => {
   const t = strings.register
   const cd = t.companyDetails
   const { data, updateData, back, setFooter } = useRegister()
@@ -89,6 +90,11 @@ const CompanyDetailsStep = ({ active }) => {
 
   return (
     <div className="company-step">
+      <StepIndicator
+        current={stepNumber}
+        total={totalSteps}
+        className="step-indicator--end"
+      />
       <form className="company-form" onSubmit={handleFormSubmit} noValidate>
         <div className="company-field">
           <label htmlFor="reg-company-name">{cd.nameLabel}</label>

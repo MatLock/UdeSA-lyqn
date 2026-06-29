@@ -8,3 +8,11 @@
   text-transform: uppercase;
   color: var(--brand-purple);
 }
+
+/* Right-aligned variant — sits at the right end of the step content. */
+.step-indicator--end {
+  align-self: stretch;
+  width: 100%;
+  margin: 6.4px 0 0;
+  text-align: right;
+}

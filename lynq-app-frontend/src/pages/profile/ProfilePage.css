@@ -1,0 +1,186 @@
+/* ProfilePage — profile editor. Reuses the auth card design + field styling
+   (matches login / register), with tokens from index.css. */
+
+/* .login-bg is position:fixed/centered on the auth pages; inside the AppLayout
+   shell it must flow next to the sidebar and scroll when the form is tall. */
+.profile-page {
+  position: relative;
+  inset: auto;
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  align-items: flex-start;
+  padding: 32px 24px;
+}
+
+/* Fills the full width available next to the sidebar (no centered max-width),
+   so there's no blank space on the left/right. */
+.profile-card {
+  max-width: none;
+  margin: 0;
+  padding: 32px;
+  gap: 4px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+  text-align: left;
+}
+
+/* Field: label on top, then an icon + control row. --icon-col aligns the label
+   and hint with the input edge, to the right of the icon. */
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  --icon-col: 34px;
+}
+
+.profile-field > label {
+  color: var(--text-h);
+  font-size: 11px;
+  margin-left: var(--icon-col);
+}
+
+.profile-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The about textarea is multi-line, so pin the icon to the top of the row. */
+.profile-control--textarea {
+  align-items: flex-start;
+}
+
+.profile-field-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.profile-field-icon.tone-blue {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--brand-blue-dark);
+}
+
+.profile-field-icon.tone-purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--brand-purple);
+}
+
+/* The input (or its eye-button wrapper) fills the rest of the control row. */
+.profile-control > input,
+.profile-control > .profile-input-wrap,
+.profile-control > .profile-textarea {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-field input,
+.profile-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+}
+
+.profile-textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.5;
+}
+
+.profile-field input:focus,
+.profile-textarea:focus {
+  border-color: var(--brand-purple);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.profile-field input[aria-invalid='true'] {
+  border-color: #ef4444;
+}
+
+.profile-field input[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.profile-error {
+  margin: 0 0 0 var(--icon-col);
+  font-size: 11px;
+  color: #ef4444;
+}
+
+.profile-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profile-input-wrap input {
+  padding-right: 34px;
+}
+
+.profile-eye {
+  position: absolute;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.profile-eye:hover {
+  color: var(--text-h);
+}
+
+.profile-hint {
+  margin: 0 0 0 var(--icon-col);
+  font-size: 11px;
+  color: var(--text);
+}
+
+.profile-save {
+  align-self: flex-end;
+  min-width: 160px;
+  margin-top: 8px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--brand-gradient);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.profile-save:hover {
+  opacity: 0.92;
+}
+
+@media (max-width: 560px) {
+  .profile-save {
+    width: 100%;
+  }
+}

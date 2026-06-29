@@ -4,13 +4,14 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
 import useRegister from '../../hooks/useRegister'
 import urlUtils from '../../utils/url'
+import StepIndicator from '../StepIndicator/StepIndicator'
 import strings from '../../i18n'
 import './OwnerProfileStep.css'
 
 // Company step 3: the owner's profile fields required by the company endpoint
 // (CreateUserWithCompanyRequest). Persists to wizard state and advances to the
 // company-details step, which performs the final submit.
-const OwnerProfileStep = ({ active }) => {
+const OwnerProfileStep = ({ active, stepNumber, totalSteps }) => {
   const t = strings.register
   const op = t.ownerProfile
   const { data, updateData, next, back, setFooter } = useRegister()
@@ -57,6 +58,11 @@ const OwnerProfileStep = ({ active }) => {
 
   return (
     <div className="owner-step">
+      <StepIndicator
+        current={stepNumber}
+        total={totalSteps}
+        className="step-indicator--end"
+      />
       <form className="owner-form" onSubmit={handleFormSubmit} noValidate>
         <div className="owner-field">
           <label htmlFor="reg-position">{op.positionLabel}</label>

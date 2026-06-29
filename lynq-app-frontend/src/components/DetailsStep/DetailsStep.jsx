@@ -11,6 +11,7 @@ import useRegisterSubmit from '../../hooks/useRegisterSubmit'
 import registrationService from '../../services/registrationService'
 import DatePicker from '../DatePicker/DatePicker'
 import Toast from '../Toast/Toast'
+import StepIndicator from '../StepIndicator/StepIndicator'
 import strings from '../../i18n'
 import './DetailsStep.css'
 
@@ -20,7 +21,7 @@ const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 // final step for candidates (submits the registration) and an intermediate step
 // for companies (advances to the owner/company steps). Wizard state lives in
 // RegisterContext, so values persist while sliding between steps.
-const DetailsStep = ({ active, isLast }) => {
+const DetailsStep = ({ active, isLast, stepNumber, totalSteps }) => {
   const t = strings.register
   const td = t.details
   const { data, updateData, next, back, setFooter } = useRegister()
@@ -105,6 +106,11 @@ const DetailsStep = ({ active, isLast }) => {
 
   return (
     <div className="details-step">
+      <StepIndicator
+        current={stepNumber}
+        total={totalSteps}
+        className="step-indicator--end"
+      />
       <form className="details-form" onSubmit={handleFormSubmit} noValidate>
         <div className="details-field">
           <label htmlFor="reg-name">{td.nameLabel}</label>

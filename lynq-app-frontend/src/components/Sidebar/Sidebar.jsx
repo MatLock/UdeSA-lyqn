@@ -4,8 +4,7 @@ import strings, { activeLocale, locales, setLocale } from '../../i18n'
 import useAuth from '../../hooks/useAuth'
 import './Sidebar.css'
 
-// Fallback avatar shown when the user has no profile image. Inline so it inherits
-// currentColor and needs no asset.
+
 const UserIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="12" cy="8" r="4" fill="currentColor" />
@@ -47,13 +46,8 @@ const Sidebar = () => {
   const { pathname } = useLocation()
   const [collapsed, setCollapsed] = useState(false)
 
-  // Forward-compatible: render the user's avatar when present, otherwise the
-  // fallback icon. The field is currently absent from the session payload.
-  const profileImageUrl = user?.profileImageUrl ?? null
 
-  // Menu entries depend on the user type. Home + Profile are shared; the last two
-  // differ between candidates (resume, applications) and companies (company, job
-  // posts). Labels come from i18n; icons are simple glyphs for now.
+  const profileImageUrl = user?.profileImageUrl ?? null
   const isCompany = user?.userType === 'COMPANY'
   const items = [
     { key: 'home', icon: '🏠', label: t.home, to: '/home' },
@@ -69,8 +63,6 @@ const Sidebar = () => {
         ]),
   ]
 
-  // Cycle to the next available locale; setLocale persists it and reloads so the
-  // whole app re-renders in the chosen language.
   const localeCodes = Object.keys(locales)
   const nextLocale =
     localeCodes[(localeCodes.indexOf(activeLocale) + 1) % localeCodes.length]

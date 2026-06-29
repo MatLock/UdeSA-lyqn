@@ -4,7 +4,6 @@ import AccountTypeStep from '../AccountTypeStep/AccountTypeStep'
 import DetailsStep from '../DetailsStep/DetailsStep'
 import OwnerProfileStep from '../OwnerProfileStep/OwnerProfileStep'
 import CompanyDetailsStep from '../CompanyDetailsStep/CompanyDetailsStep'
-import StepIndicator from '../StepIndicator/StepIndicator'
 import './RegisterWizard.css'
 
 
@@ -33,7 +32,6 @@ const RegisterWizard = () => {
 
   return (
     <div className="register-wizard">
-      <StepIndicator current={step + 1} total={steps.length} />
       <div className="register-wizard-viewport" style={{ height: viewportHeight }}>
         <div
           className="register-wizard-track"
@@ -49,7 +47,12 @@ const RegisterWizard = () => {
                 aria-hidden={!isActive}
                 inert={isActive ? undefined : true}
               >
-                <StepComponent active={isActive} isLast={index === steps.length - 1} />
+                <StepComponent
+                  active={isActive}
+                  isLast={index === steps.length - 1}
+                  stepNumber={index + 1}
+                  totalSteps={steps.length}
+                />
               </div>
             )
           })}

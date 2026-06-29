@@ -4,9 +4,10 @@ import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import strings from '../../i18n'
 import useRegister from '../../hooks/useRegister'
+import StepIndicator from '../StepIndicator/StepIndicator'
 import './AccountTypeStep.css'
 
-const AccountTypeStep = ({ active }) => {
+const AccountTypeStep = ({ active, stepNumber, totalSteps }) => {
   const t = strings.register
   const { data, updateData, next, setFooter } = useRegister()
   const [accountType, setAccountType] = useState(data.accountType || '')
@@ -28,8 +29,7 @@ const AccountTypeStep = ({ active }) => {
     },
   ]
 
-  // Drive the shared footer while this is the active step. Re-runs when the
-  // selection changes so the Next button's enabled state stays in sync.
+
   useEffect(() => {
     if (!active) return
     setFooter({
@@ -49,6 +49,11 @@ const AccountTypeStep = ({ active }) => {
     <div className="account-type-step">
       <p className="account-type-question">{t.accountType.question}</p>
       <p className="account-type-helper">{t.accountType.helper}</p>
+      <StepIndicator
+        current={stepNumber}
+        total={totalSteps}
+        className="step-indicator--end"
+      />
 
       <div className="account-type-options">
         {options.map(({ value, tone, title, description, Icon }) => {
