@@ -12,7 +12,6 @@ import java.time.LocalDate;
 public class UpdateUserProfileRequest {
 
   private String fullName;
-  private String userProfileImageUrl;
   private String currentPosition;
   private String about;
   private String githubUrl;

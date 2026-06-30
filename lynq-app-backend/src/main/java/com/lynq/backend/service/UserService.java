@@ -14,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final StorageService storageService;
 
-  public UserService(UserRepository userRepository){
+  public UserService(UserRepository userRepository, StorageService storageService){
     this.userRepository = userRepository;
+    this.storageService = storageService;
   }
 
   @AuditLog
@@ -55,9 +57,6 @@ public class UserService {
     if (request.getFullName() != null) {
       user.setFullName(request.getFullName());
     }
-    if (request.getUserProfileImageUrl() != null) {
-      user.setProfileImageUrl(request.getUserProfileImageUrl());
-    }
     if (request.getCurrentPosition() != null) {
       user.setCurrentPosition(request.getCurrentPosition());
     }
@@ -75,6 +74,26 @@ public class UserService {
     }
 
     return userRepository.save(user);
+  }
+
+  @AuditLog
+  @Transactional
+  public String generateProfileImageUploadUrl(String userId, String fileName) {
+    UserEntity user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException("User '" + userId + "' not found"));
+
+    String previousImagePath = user.getProfileImageUrl();
+    PreSignedUploadUrl preSignedUploadUrl = storageService.createUserProfilePreSignedUrl(user, fileName);
+
+    user.setProfileImageUrl(preSignedUploadUrl.s3Path());
+    userRepository.save(user);
+
+    if (previousImagePath != null && !previousImagePath.isBlank()
+        && !previousImagePath.equals(preSignedUploadUrl.s3Path())) {
+      storageService.deleteObject(previousImagePath);
+    }
+
+    return preSignedUploadUrl.url();
   }
 
 }

@@ -14,6 +14,7 @@ import com.lynq.backend.repository.CompanyRepository;
 import com.lynq.backend.repository.JobPostRepository;
 import com.lynq.backend.repository.JobPostSkillRepository;
 import com.lynq.backend.repository.UserRepository;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.model.MediaType;
@@ -41,6 +42,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
 
   private static final String CONTEXT_PATH = "/lynq-app-backend";
   private static final String CREATE_USER_PATH = "/user";
+  private static final String GENERATE_UPLOAD_IMAGE_PATH = "/user/generate-upload-image";
   private static final String CREATE_COMPANY_PATH = "/company";
   private static final String CREATE_JOB_PATH = "/job";
   private static final String VALIDATE_PATH = "/auth/validate";
@@ -66,6 +68,7 @@ class BackendAppApplicationTests extends AbstractE2ETest {
   private static final String GITHUB_URL = "https://github.com/janedoe";
   private static final String LINKEDIN_URL = "https://linkedin.com/in/janedoe";
   private static final LocalDate BIRTH_DATE = LocalDate.of(1995, 4, 12);
+  private static final String UPLOAD_FILE_NAME = "avatar.png";
 
   private static final String COMPANY_NAME = "Lynq Technologies";
   private static final String COMPANY_ABOUT = "We build talent matching platforms.";
@@ -250,6 +253,53 @@ class BackendAppApplicationTests extends AbstractE2ETest {
 
     assertThat(response.statusCode(), is(401));
     assertThat(userRepository.findById(USER_ID).orElseThrow().getFullName(), is(FULL_NAME));
+  }
+
+  @Test
+  void generateUploadImageUrlReturnsPreSignedUrlThatUploadsToS3AndPersistsThePath() throws Exception {
+    stubIamValidateToken();
+    stubIamUserInfo();
+    seedCandidateUser();
+
+    HttpResponse<String> response = getGenerateUploadImageUrl(UPLOAD_FILE_NAME);
+
+    assertThat(response.statusCode(), is(200));
+    Map<String, Object> body = parse(response.body());
+    assertThat(body.get("success"), is(true));
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> data = (Map<String, Object>) body.get("data");
+    String preSignedUrl = (String) data.get("preSignedUrl");
+    assertThat(preSignedUrl, is(notNullValue()));
+
+    // the generated S3 path is persisted as the user's profile image reference
+    String expectedKey = "lynq/users/" + USER_ID + "/profile/" + UPLOAD_FILE_NAME;
+    assertThat(userRepository.findById(USER_ID).orElseThrow().getProfileImageUrl(), is(expectedKey));
+
+    // the frontend pushes the binary straight to S3 using the pre-signed URL
+    byte[] imageBytes = "profile-image-binary".getBytes();
+    HttpResponse<Void> uploadResponse = httpClient.send(
+        HttpRequest.newBuilder()
+            .uri(URI.create(preSignedUrl))
+            .PUT(HttpRequest.BodyPublishers.ofByteArray(imageBytes))
+            .build(),
+        HttpResponse.BodyHandlers.discarding());
+    assertThat(uploadResponse.statusCode(), is(200));
+
+    // and the object can be obtained back from S3 at the persisted path
+    byte[] storedBytes = s3TestClient.getObjectAsBytes(
+        GetObjectRequest.builder().bucket(AWS_BUCKET).key(expectedKey).build()).asByteArray();
+    assertThat(storedBytes, is(imageBytes));
+  }
+
+  @Test
+  void generateUploadImageUrlReturnsUnauthorizedWhenIamRejectsToken() throws Exception {
+    stubIamInvalidToken();
+    seedCandidateUser();
+
+    HttpResponse<String> response = getGenerateUploadImageUrl(UPLOAD_FILE_NAME);
+
+    assertThat(response.statusCode(), is(401));
   }
 
   @Test
@@ -458,6 +508,16 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
   }
 
+  private HttpResponse<String> getGenerateUploadImageUrl(String fileName) throws Exception {
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+        .uri(URI.create(generateUploadImageUrl(fileName)))
+        .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+        .header(REQUEST_UUID_HEADER, REQUEST_UUID)
+        .GET()
+        .build();
+    return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+  }
+
   private HttpResponse<String> patchUserProfile(UpdateUserProfileRequest updateRequest) throws Exception {
     HttpRequest httpRequest = HttpRequest.newBuilder()
         .uri(URI.create(createUserUrl()))
@@ -547,6 +607,10 @@ class BackendAppApplicationTests extends AbstractE2ETest {
 
   private String createUserUrl() {
     return "http://localhost:" + port + CONTEXT_PATH + CREATE_USER_PATH;
+  }
+
+  private String generateUploadImageUrl(String fileName) {
+    return "http://localhost:" + port + CONTEXT_PATH + GENERATE_UPLOAD_IMAGE_PATH + "?file-name=" + fileName;
   }
 
   private String createCompanyUrl() {

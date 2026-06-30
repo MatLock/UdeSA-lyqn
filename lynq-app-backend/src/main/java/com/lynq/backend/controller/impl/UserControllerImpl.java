@@ -4,6 +4,7 @@ import com.lynq.backend.controller.UserController;
 import com.lynq.backend.controller.request.CreateUserRequest;
 import com.lynq.backend.controller.request.UpdateUserProfileRequest;
 import com.lynq.backend.controller.response.CreateUserRestResponse;
+import com.lynq.backend.controller.response.GenerateUploadImageRestResponse;
 import com.lynq.backend.controller.response.GetUserRestResponse;
 import com.lynq.backend.controller.response.GlobalRestResponse;
 import com.lynq.backend.controller.response.UpdateUserProfileRestResponse;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -104,6 +106,21 @@ public class UserControllerImpl implements UserController {
         .linkedinUrl(user.getLinkedinUrl())
         .birthDate(user.getBirthDate())
         .createdOn(user.getCreatedOn())
+        .build();
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(new GlobalRestResponse<>(true, response));
+  }
+
+  @Override
+  @GetMapping("/generate-upload-image")
+  public ResponseEntity<GlobalRestResponse<GenerateUploadImageRestResponse>> generateUploadImageUrl(
+      @RequestParam("file-name") String fileName, @AuthenticationPrincipal LynqUserPrincipal principal) {
+    String preSignedUrl = userService.generateProfileImageUploadUrl(principal.getId(), fileName);
+
+    GenerateUploadImageRestResponse response = GenerateUploadImageRestResponse.builder()
+        .preSignedUrl(preSignedUrl)
         .build();
 
     return ResponseEntity

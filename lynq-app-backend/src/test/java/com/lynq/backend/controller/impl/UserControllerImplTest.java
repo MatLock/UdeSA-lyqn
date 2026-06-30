@@ -3,6 +3,7 @@ package com.lynq.backend.controller.impl;
 import com.lynq.backend.controller.request.CreateUserRequest;
 import com.lynq.backend.controller.request.UpdateUserProfileRequest;
 import com.lynq.backend.controller.response.CreateUserRestResponse;
+import com.lynq.backend.controller.response.GenerateUploadImageRestResponse;
 import com.lynq.backend.controller.response.GetUserRestResponse;
 import com.lynq.backend.controller.response.GlobalRestResponse;
 import com.lynq.backend.controller.response.UpdateUserProfileRestResponse;
@@ -38,6 +39,9 @@ class UserControllerImplTest {
   private static final String LINKEDIN_URL = "https://linkedin.com/in/janedoe";
   private static final LocalDate BIRTH_DATE = LocalDate.of(1995, 4, 12);
   private static final LocalDate CREATED_ON = LocalDate.of(2026, 6, 25);
+  private static final String FILE_NAME = "avatar.png";
+  private static final String PRE_SIGNED_URL =
+      "https://lynq-bucket.s3.amazonaws.com/lynq/users/" + USER_ID + "/profile/" + FILE_NAME + "?X-Amz-Signature=abc";
 
   @Mock
   private UserService userService;
@@ -212,6 +216,29 @@ class UserControllerImplTest {
     assertThat(data.getLinkedinUrl(), is(LINKEDIN_URL));
     assertThat(data.getBirthDate(), is(BIRTH_DATE));
     assertThat(data.getCreatedOn(), is(CREATED_ON));
+  }
+
+  @Test
+  void generateUploadImageUrlDelegatesToServiceWithPrincipalIdAndFileName() {
+    when(userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME)).thenReturn(PRE_SIGNED_URL);
+
+    userController.generateUploadImageUrl(FILE_NAME, principal);
+
+    verify(userService).generateProfileImageUploadUrl(USER_ID, FILE_NAME);
+  }
+
+  @Test
+  void generateUploadImageUrlRespondsWithOkStatusAndPreSignedUrl() {
+    when(userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME)).thenReturn(PRE_SIGNED_URL);
+
+    ResponseEntity<GlobalRestResponse<GenerateUploadImageRestResponse>> response =
+        userController.generateUploadImageUrl(FILE_NAME, principal);
+
+    assertThat(response.getStatusCode(), is(HttpStatus.OK));
+    GlobalRestResponse<GenerateUploadImageRestResponse> body = response.getBody();
+    assertThat(body, is(org.hamcrest.Matchers.notNullValue()));
+    assertThat(body.isSuccess(), is(true));
+    assertThat(body.getData().getPreSignedUrl(), is(PRE_SIGNED_URL));
   }
 
   private UserEntity savedUser() {

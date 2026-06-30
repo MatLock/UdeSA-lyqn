@@ -40,17 +40,26 @@ class UserServiceTest {
   private static final String UPDATED_FULL_NAME = "Jane Q. Doe";
   private static final String UPDATED_CURRENT_POSITION = "Staff Engineer";
 
+  private static final String FILE_NAME = "avatar.png";
+  private static final String S3_PATH = "lynq/users/" + USER_ID + "/profile/" + FILE_NAME;
+  private static final String PREVIOUS_S3_PATH = "lynq/users/" + USER_ID + "/profile/old-avatar.png";
+  private static final String PRE_SIGNED_URL =
+      "https://lynq-bucket.s3.amazonaws.com/" + S3_PATH + "?X-Amz-Signature=abc";
+
   @Mock
   private UserRepository userRepository;
 
   @Mock
   private UpdateUserProfileRequest updateRequest;
 
+  @Mock
+  private StorageService storageService;
+
   private UserService userService;
 
   @BeforeEach
   void setUp() {
-    userService = new UserService(userRepository);
+    userService = new UserService(userRepository, storageService);
   }
 
   @Test
@@ -170,6 +179,69 @@ class UserServiceTest {
 
     assertThrows(NotFoundException.class,
         () -> userService.updateUserProfile(USER_ID, updateRequest));
+    verify(userRepository, never()).save(any());
+  }
+
+  @Test
+  void generateProfileImageUploadUrlPersistsS3PathAndReturnsPreSignedUrl() {
+    UserEntity existing = existingUser();
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(storageService.createUserProfilePreSignedUrl(existing, FILE_NAME))
+        .thenReturn(new PreSignedUploadUrl(S3_PATH, PRE_SIGNED_URL));
+    ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
+
+    String result = userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME);
+
+    assertThat(result, is(PRE_SIGNED_URL));
+    verify(userRepository).save(userCaptor.capture());
+    assertThat(userCaptor.getValue().getProfileImageUrl(), is(S3_PATH));
+  }
+
+  @Test
+  void generateProfileImageUploadUrlDeletesPreviousObjectWhenPathChanges() {
+    UserEntity existing = existingUser();
+    existing.setProfileImageUrl(PREVIOUS_S3_PATH);
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(storageService.createUserProfilePreSignedUrl(existing, FILE_NAME))
+        .thenReturn(new PreSignedUploadUrl(S3_PATH, PRE_SIGNED_URL));
+
+    userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME);
+
+    verify(storageService).deleteObject(PREVIOUS_S3_PATH);
+  }
+
+  @Test
+  void generateProfileImageUploadUrlDoesNotDeleteWhenNoPreviousObjectExists() {
+    UserEntity existing = existingUser();
+    existing.setProfileImageUrl(null);
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(storageService.createUserProfilePreSignedUrl(existing, FILE_NAME))
+        .thenReturn(new PreSignedUploadUrl(S3_PATH, PRE_SIGNED_URL));
+
+    userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME);
+
+    verify(storageService, never()).deleteObject(any());
+  }
+
+  @Test
+  void generateProfileImageUploadUrlDoesNotDeleteWhenPathIsUnchanged() {
+    UserEntity existing = existingUser();
+    existing.setProfileImageUrl(S3_PATH);
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.of(existing));
+    when(storageService.createUserProfilePreSignedUrl(existing, FILE_NAME))
+        .thenReturn(new PreSignedUploadUrl(S3_PATH, PRE_SIGNED_URL));
+
+    userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME);
+
+    verify(storageService, never()).deleteObject(any());
+  }
+
+  @Test
+  void generateProfileImageUploadUrlThrowsNotFoundWhenUserDoesNotExist() {
+    when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class,
+        () -> userService.generateProfileImageUploadUrl(USER_ID, FILE_NAME));
     verify(userRepository, never()).save(any());
   }
 
