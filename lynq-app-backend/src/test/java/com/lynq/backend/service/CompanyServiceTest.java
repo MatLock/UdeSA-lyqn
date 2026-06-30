@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 class CompanyServiceTest {
 
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
-  private static final String USER_PROFILE_IMAGE_URL = "https://cdn.lynq.com/avatars/jane.png";
   private static final String CURRENT_POSITION = "Founder";
   private static final String USER_ABOUT = "Building the Lynq hiring platform.";
   private static final String LINKEDIN_URL = "https://linkedin.com/in/janedoe";
@@ -65,7 +64,7 @@ class CompanyServiceTest {
 
     companyService.createUserWithCompany(USER_ID, request);
 
-    verify(userService).saveNewUser(USER_ID, UserType.COMPANY, NO_FULL_NAME, USER_PROFILE_IMAGE_URL,
+    verify(userService).saveNewUser(USER_ID, UserType.COMPANY, NO_FULL_NAME,
         CURRENT_POSITION, USER_ABOUT, NO_GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
   }
 
@@ -73,7 +72,7 @@ class CompanyServiceTest {
   void createUserWithCompanyPersistsCompanyBuiltFromRequestAndOwner() {
     stubRequestFields();
     UserEntity owner = UserEntity.builder().id(USER_ID).build();
-    when(userService.saveNewUser(USER_ID, UserType.COMPANY, NO_FULL_NAME, USER_PROFILE_IMAGE_URL,
+    when(userService.saveNewUser(USER_ID, UserType.COMPANY, NO_FULL_NAME,
         CURRENT_POSITION, USER_ABOUT, NO_GITHUB_URL, LINKEDIN_URL, BIRTH_DATE)).thenReturn(owner);
     when(companyRepository.save(any(CompanyEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -134,13 +133,12 @@ class CompanyServiceTest {
     assertThrows(BadRequestException.class,
         () -> companyService.createUserWithCompany(USER_ID, request));
 
-    verify(userService, never()).saveNewUser(any(), any(), any(), any(), any(), any(), any(), any(), any());
+    verify(userService, never()).saveNewUser(any(), any(), any(), any(), any(), any(), any(), any());
     verify(companyRepository, never()).save(any());
   }
 
   private void stubRequestFields() {
     when(request.getCompanyName()).thenReturn(COMPANY_NAME);
-    when(request.getUserProfileImageUrl()).thenReturn(USER_PROFILE_IMAGE_URL);
     when(request.getCurrentPosition()).thenReturn(CURRENT_POSITION);
     when(request.getUserAbout()).thenReturn(USER_ABOUT);
     when(request.getLinkedinUrl()).thenReturn(LINKEDIN_URL);

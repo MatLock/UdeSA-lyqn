@@ -68,7 +68,6 @@ public class UserControllerImpl implements UserController {
         principal.getId(),
         request.getUserType(),
         request.getFullName(),
-        request.getUserProfileImageUrl(),
         request.getCurrentPosition(),
         request.getAbout(),
         request.getGithubUrl(),

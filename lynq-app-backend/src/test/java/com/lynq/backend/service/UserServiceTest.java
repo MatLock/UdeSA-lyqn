@@ -67,7 +67,7 @@ class UserServiceTest {
     when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
 
-    userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
 
     verify(userRepository).save(userCaptor.capture());
@@ -75,7 +75,7 @@ class UserServiceTest {
     assertThat(saved.getId(), is(USER_ID));
     assertThat(saved.getType(), is(USER_TYPE));
     assertThat(saved.getFullName(), is(FULL_NAME));
-    assertThat(saved.getProfileImageUrl(), is(PROFILE_IMAGE_URL));
+    assertThat(saved.getProfileImageUrl(), is(org.hamcrest.Matchers.nullValue()));
     assertThat(saved.getCurrentPosition(), is(CURRENT_POSITION));
     assertThat(saved.getAbout(), is(ABOUT));
     assertThat(saved.getGithubUrl(), is(GITHUB_URL));
@@ -88,7 +88,7 @@ class UserServiceTest {
     when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
 
-    userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
 
     verify(userRepository).save(userCaptor.capture());
@@ -100,7 +100,7 @@ class UserServiceTest {
     UserEntity persisted = UserEntity.builder().id(USER_ID).build();
     when(userRepository.save(any(UserEntity.class))).thenReturn(persisted);
 
-    UserEntity result = userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL,
+    UserEntity result = userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME,
         CURRENT_POSITION, ABOUT, GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
 
     assertThat(result, is(sameInstance(persisted)));

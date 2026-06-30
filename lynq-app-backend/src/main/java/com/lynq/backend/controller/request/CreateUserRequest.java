@@ -18,7 +18,6 @@ public class CreateUserRequest {
   private UserType userType;
   @NotBlank
   private String fullName;
-  private String userProfileImageUrl;
   private String currentPosition;
   private String about;
   private String githubUrl;

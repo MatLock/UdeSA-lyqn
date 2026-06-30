@@ -23,13 +23,12 @@ public class UserService {
 
   @AuditLog
   @Transactional
-  public UserEntity saveNewUser(String userId, UserType type, String fullName, String profileImageUrl,
+  public UserEntity saveNewUser(String userId, UserType type, String fullName,
       String currentPosition, String about, String githubUrl, String linkedInUrl, LocalDate birthDate) {
     UserEntity user = UserEntity.builder()
         .id(userId)
         .type(type)
         .fullName(fullName)
-        .profileImageUrl(profileImageUrl)
         .currentPosition(currentPosition)
         .about(about)
         .githubUrl(githubUrl)

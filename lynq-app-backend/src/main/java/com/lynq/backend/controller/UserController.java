@@ -212,7 +212,6 @@ public interface UserController {
               value = """
                   {
                     "userType": "CANDIDATE",
-                    "userProfileImageUrl": "https://cdn.lynq.com/avatars/jane.png",
                     "currentPosition": "Backend Engineer",
                     "about": "Java developer focused on distributed systems.",
                     "githubUrl": "https://github.com/janedoe",

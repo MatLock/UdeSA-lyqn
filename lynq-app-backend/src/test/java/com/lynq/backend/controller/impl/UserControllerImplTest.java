@@ -66,7 +66,6 @@ class UserControllerImplTest {
   private void stubCreateRequestFields() {
     when(request.getUserType()).thenReturn(USER_TYPE);
     when(request.getFullName()).thenReturn(FULL_NAME);
-    when(request.getUserProfileImageUrl()).thenReturn(PROFILE_IMAGE_URL);
     when(request.getCurrentPosition()).thenReturn(CURRENT_POSITION);
     when(request.getAbout()).thenReturn(ABOUT);
     when(request.getGithubUrl()).thenReturn(GITHUB_URL);
@@ -119,19 +118,19 @@ class UserControllerImplTest {
   @Test
   void createUserDelegatesToServiceWithPrincipalIdAndRequestFields() {
     stubCreateRequestFields();
-    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE)).thenReturn(savedUser());
 
     userController.createUser(request, principal);
 
-    verify(userService).saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    verify(userService).saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE);
   }
 
   @Test
   void createUserRespondsWithCreatedStatus() {
     stubCreateRequestFields();
-    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE)).thenReturn(savedUser());
 
     ResponseEntity<GlobalRestResponse<CreateUserRestResponse>> response =
@@ -143,7 +142,7 @@ class UserControllerImplTest {
   @Test
   void createUserWrapsSuccessfulResponseBody() {
     stubCreateRequestFields();
-    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE)).thenReturn(savedUser());
 
     ResponseEntity<GlobalRestResponse<CreateUserRestResponse>> response =
@@ -157,7 +156,7 @@ class UserControllerImplTest {
   @Test
   void createUserMapsSavedEntityIntoResponseData() {
     stubCreateRequestFields();
-    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, PROFILE_IMAGE_URL, CURRENT_POSITION, ABOUT,
+    when(userService.saveNewUser(USER_ID, USER_TYPE, FULL_NAME, CURRENT_POSITION, ABOUT,
         GITHUB_URL, LINKEDIN_URL, BIRTH_DATE)).thenReturn(savedUser());
 
     ResponseEntity<GlobalRestResponse<CreateUserRestResponse>> response =

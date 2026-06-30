@@ -114,3 +114,5 @@ parameters:
 "30-06-2026","create endpoint in UserController GET /user/generate-upload-image?file-name={file_name} that taking the file name. generates profile_image_url with the file name. save it in the database and returns a preSignedUrl so the front-end can push the binary of the file into the s3. Also take into account that this file can be replaced in any moment in time"
 "30-06-2026","delete the old s3 object on replacement"
 "30-06-2026","add integration test for s3 push and obtain using testcontainer + localstack"
+"30-06-2026","remove getUserProfileImageUrl from `CreateUserRequest` in `createUser` endpoint implementation"
+"30-06-2026","remove getUserProfileImageUrl from `CreateUserRequest` in `createUser` endpoint implementation"

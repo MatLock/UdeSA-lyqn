@@ -625,7 +625,6 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     CreateUserRequest request = new CreateUserRequest();
     request.setUserType(UserType.CANDIDATE);
     request.setFullName(FULL_NAME);
-    request.setUserProfileImageUrl(PROFILE_IMAGE_URL);
     request.setCurrentPosition(CURRENT_POSITION);
     request.setAbout(ABOUT);
     request.setGithubUrl(GITHUB_URL);

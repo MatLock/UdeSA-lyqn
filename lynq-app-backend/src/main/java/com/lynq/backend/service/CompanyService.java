@@ -32,7 +32,6 @@ public class CompanyService {
         userId,
         UserType.COMPANY,
         null,
-        request.getUserProfileImageUrl(),
         request.getCurrentPosition(),
         request.getUserAbout(),
         null,
