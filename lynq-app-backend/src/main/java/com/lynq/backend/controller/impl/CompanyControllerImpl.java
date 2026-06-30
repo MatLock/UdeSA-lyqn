@@ -1,5 +1,6 @@
 package com.lynq.backend.controller.impl;
 
+import com.lynq.backend.aspect.AuditLog;
 import com.lynq.backend.controller.request.CreateUserWithCompanyRequest;
 import com.lynq.backend.controller.response.CreateUserWithCompanyRestResponse;
 import com.lynq.backend.controller.response.GlobalRestResponse;
@@ -28,6 +29,7 @@ public class CompanyControllerImpl implements com.lynq.backend.controller.Compan
 
   @Override
   @PostMapping
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<CreateUserWithCompanyRestResponse>> createUserWithCompany(@RequestBody CreateUserWithCompanyRequest request, @AuthenticationPrincipal LynqUserPrincipal principal) {
     CompanyEntity company = companyService.createUserWithCompany(principal.getId(), request);
 

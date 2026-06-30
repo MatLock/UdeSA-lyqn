@@ -1,5 +1,6 @@
 package com.lynq.backend.controller.impl;
 
+import com.lynq.backend.aspect.AuditLog;
 import com.lynq.backend.controller.JobController;
 import com.lynq.backend.controller.request.CreateJobRequest;
 import com.lynq.backend.controller.response.CreateJobRestResponse;
@@ -28,6 +29,7 @@ public class JobControllerImpl implements JobController {
 
   @Override
   @PostMapping
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<CreateJobRestResponse>> createJob(@RequestBody CreateJobRequest request) {
     JobPostEntity job = jobService.createJob(
         request.getTitle(),

@@ -1,5 +1,6 @@
 package com.lynq.backend.controller.impl;
 
+import com.lynq.backend.aspect.AuditLog;
 import com.lynq.backend.controller.UserController;
 import com.lynq.backend.controller.request.CreateUserRequest;
 import com.lynq.backend.controller.request.UpdateUserProfileRequest;
@@ -37,6 +38,7 @@ public class UserControllerImpl implements UserController {
 
   @Override
   @GetMapping
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<GetUserRestResponse>> getUser(@AuthenticationPrincipal LynqUserPrincipal principal) {
     UserEntity user = userService.getUser(principal.getId());
 
@@ -60,6 +62,7 @@ public class UserControllerImpl implements UserController {
 
   @Override
   @PostMapping
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<CreateUserRestResponse>> createUser(@RequestBody CreateUserRequest request, @AuthenticationPrincipal LynqUserPrincipal principal) {
     UserEntity user = userService.saveNewUser(
         principal.getId(),
@@ -92,6 +95,7 @@ public class UserControllerImpl implements UserController {
 
   @Override
   @PatchMapping
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<UpdateUserProfileRestResponse>> updateUserProfile(@RequestBody UpdateUserProfileRequest request, @AuthenticationPrincipal LynqUserPrincipal principal) {
     UserEntity user = userService.updateUserProfile(principal.getId(), request);
 
@@ -115,6 +119,7 @@ public class UserControllerImpl implements UserController {
 
   @Override
   @GetMapping("/generate-upload-image")
+  @AuditLog
   public ResponseEntity<GlobalRestResponse<GenerateUploadImageRestResponse>> generateUploadImageUrl(
       @RequestParam("file-name") String fileName, @AuthenticationPrincipal LynqUserPrincipal principal) {
     String preSignedUrl = userService.generateProfileImageUploadUrl(principal.getId(), fileName);
