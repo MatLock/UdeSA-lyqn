@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockserver.model.HttpRequest.request;
@@ -168,7 +169,11 @@ class BackendAppApplicationTests extends AbstractE2ETest {
     assertThat(data.get("id"), is(USER_ID));
     assertThat(data.get("userType"), is(UserType.CANDIDATE.name()));
     assertThat(data.get("fullName"), is(FULL_NAME));
-    assertThat(data.get("userProfileImageUrl"), is(PROFILE_IMAGE_URL));
+    // the stored profile image reference is returned as a pre-signed download URL
+    String userProfileImageUrl = (String) data.get("userProfileImageUrl");
+    assertThat(userProfileImageUrl, is(notNullValue()));
+    assertThat(userProfileImageUrl, containsString("X-Amz-Signature"));
+    assertThat(userProfileImageUrl, containsString(PROFILE_IMAGE_URL.substring("https://".length())));
     assertThat(data.get("currentPosition"), is(CURRENT_POSITION));
     assertThat(data.get("about"), is(ABOUT));
     assertThat(data.get("githubUrl"), is(GITHUB_URL));
